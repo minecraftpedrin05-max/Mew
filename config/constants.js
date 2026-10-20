@@ -1,5 +1,5 @@
 module.exports = {
-  BOT_OWNER_ID: "1242005187019669596",
+  BOT_OWNER_ID: "1521881835171221559",
   MODOS_VALIDOS: [
     "1x1mob", "2x2mob", "3x3mob", "4x4mob",
     "1x1emu", "2x2emu", "3x3emu", "4x4emu",
