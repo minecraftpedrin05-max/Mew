@@ -47,7 +47,7 @@ module.exports = {
       if (interaction.isButton()) return require('../commands/ativar').handleButton(interaction);
     }
 
-    // ── CARTEIRA (KRON PRO) — migrada da source antiga, reaproveitando
+    // ── CARTEIRA (KAEL) — migrada da source antiga, reaproveitando
     // o mesmo banco (database/carteiraDB.js) já usado pela Parte 1. ──
     if (customId === 'carteira_menu' || customId === 'modal_pix_chave' || customId?.startsWith('carteira_')) {
       const { handleCarteira } = require('../handlers/carteiraHandler');
@@ -65,7 +65,7 @@ module.exports = {
       if (interaction.isButton()) return configExportManager.handleButton(interaction);
     }
 
-    // -- KRON INVITE SYSTEM --
+    // -- KAEL INVITE SYSTEM --
     if (customId?.startsWith('invite_')) {
       const inviteCommand = require('../commands/invite');
 

@@ -1,7 +1,7 @@
 
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Personalização do Bot por Servidor
+ *  KAEL — Personalização do Bot por Servidor
  *  Acionado por: botão 'painel_personalizacao' no /painel
  *
  *  Usa a rota "Modify Current Member" da API do Discord, liberada
@@ -162,7 +162,7 @@ function modalEditar(interaction) {
       new TextInputBuilder()
         .setCustomId('nick')
         .setLabel('Nome do bot neste servidor (branco p/ manter)')
-        .setPlaceholder('Ex: KRON PRO')
+        .setPlaceholder('Ex: KAEL')
         .setStyle(TextInputStyle.Short)
         .setValue(cfg.nick || '')
         .setRequired(false)

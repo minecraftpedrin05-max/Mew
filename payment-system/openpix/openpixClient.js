@@ -29,7 +29,7 @@
 //
 //  Autenticação: header "Authorization: <appID>" (sem prefixo "Bearer"),
 //  exatamente como em todos os exemplos de charge/subaccount da
-//  documentação. O appID é da CONTA PRINCIPAL da KRON (não por
+//  documentação. O appID é da CONTA PRINCIPAL da KAEL (não por
 //  servidor) — ver payment-system/openpix/openpixManager.js.
 // ═══════════════════════════════════════════════════════════════════════
 
@@ -71,7 +71,7 @@ async function _request(path, { method = 'GET', body } = {}) {
  * Cria uma cobrança PIX, opcionalmente com split de 100% do valor para
  * a subconta do servidor (splitType: 'SPLIT_SUB_ACCOUNT') — é assim que
  * "cada servidor tem seu próprio saldo" dentro de uma única conta
- * OpenPix da KRON (TAREFA 1).
+ * OpenPix da KAEL (TAREFA 1).
  * @param {{ correlationID: string, valorCentavos: number, comentario?: string, subaccountPixKey?: string }} args
  */
 async function criarCobranca({ correlationID, valorCentavos, comentario, subaccountPixKey }) {

@@ -21,7 +21,7 @@ module.exports = {
     if (!produto) {
       return interaction.reply({
         embeds: [new EmbedBuilder().setColor(0xED4245).setTitle('<:negativo:1528400986744295475> Não é uma vitrine de produto')
-          .setDescription('> Esta mensagem não corresponde a nenhum produto publicado pela KRON PRO.')],
+          .setDescription('> Esta mensagem não corresponde a nenhum produto publicado pela KAEL.')],
         flags: 64,
       });
     }

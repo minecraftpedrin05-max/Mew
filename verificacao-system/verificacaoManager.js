@@ -1,6 +1,6 @@
 'use strict';
 /**
- * KRON PRO — Sistema de Verificação
+ * KAEL — Sistema de Verificação
  * Acesso: /painel → 🛡️ Verificação (prefixo de customId: 'vf_').
  * Persistência: db.getGuild(guildId).verificacao (SQLite, isolado por guild).
  * Painéis: cfg.panels[panelId] = { panelId, guildId, channelId, messageId, appearance, button… }
@@ -377,7 +377,7 @@ function validarCargo(guild, roleId, member) {
   if (role.managed) return `${role} é gerenciado por integração e não pode ser atribuído.`;
   const me = guild.members.me;
   if (!me?.permissions.has(PermissionFlagsBits.ManageRoles)) return 'O bot precisa da permissão **Gerenciar Cargos**.';
-  if (role.comparePositionTo(me.roles.highest) >= 0) return `${role} está acima (ou igual) ao cargo do bot. Suba o cargo do KRON.`;
+  if (role.comparePositionTo(me.roles.highest) >= 0) return `${role} está acima (ou igual) ao cargo do bot. Suba o cargo do KAEL.`;
   if (member && guild.ownerId !== member.id && role.comparePositionTo(member.roles.highest) >= 0) {
     return `${role} está acima do seu cargo mais alto.`;
   }
@@ -433,7 +433,7 @@ const PANEL_STATUS = { none: '`Não publicado`', ok: '`Publicado`', missing: '�
 
 function container(header, notice) {
   const c = new ContainerBuilder().setAccentColor(0x000000)
-    .addTextDisplayComponents(txt(`# KRON PRO — Sistema de Verificação\n-# ${header}`));
+    .addTextDisplayComponents(txt(`# KAEL — Sistema de Verificação\n-# ${header}`));
   if (notice) c.addTextDisplayComponents(txt(`> ⚠️ ${notice}`));
   return c.addSeparatorComponents(sep());
 }
@@ -494,7 +494,7 @@ function screenRoles(g, cfg, notice) {
   return container('Cargos', notice)
     .addTextDisplayComponents(txt(
       `**Principal:** ${cargoTxt(g, cfg.roles.main)}\n**Adicionais:** ${extras}\n**Não verificado:** ${cargoTxt(g, cfg.roles.unverified)}\n` +
-      '-# O cargo precisa estar abaixo do cargo do KRON na hierarquia.'))
+      '-# O cargo precisa estar abaixo do cargo do KAEL na hierarquia.'))
     .addActionRowComponents(rs('vf_sel_rolemain', 'Cargo principal (verificado)', 1, cfg.roles.main ? [cfg.roles.main] : []))
     .addActionRowComponents(rs('vf_sel_roleextra', 'Cargos adicionais', MAX_EXTRA, cfg.roles.extra))
     .addActionRowComponents(rs('vf_sel_roleunv', 'Cargo de não verificado', 1, cfg.roles.unverified ? [cfg.roles.unverified] : []))
@@ -669,14 +669,14 @@ function screenWeb(g, cfg, notice) {
     .addTextDisplayComponents(txt(
       'Ao clicar no botão do painel, em vez de verificar na hora dentro do Discord, o bot manda o usuário para uma ' +
       'página web (OAuth2 oficial do Discord) e libera o cargo depois da confirmação.\n\n' +
-      `**Status:** ${onOff(w.enabled)}\n**Modo:** \`${w.mode === 'custom' ? 'Site personalizado' : 'Site padrão KRON'}\`\n` +
+      `**Status:** ${onOff(w.enabled)}\n**Modo:** \`${w.mode === 'custom' ? 'Site personalizado' : 'Site padrão KAEL'}\`\n` +
       (w.mode === 'custom' ? `**URL do site:** ${val(w.customUrl)}\n**Secret configurado:** ${w.customSecretHash ? '`Sim`' : '`Não`'}\n` : '') +
-      (!okEnv ? '\n> ⚠️ O OAuth2 do Discord ainda não foi configurado no bot (variáveis de ambiente `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `PUBLIC_BASE_URL`). O modo Site padrão KRON não vai funcionar até isso ser configurado.' : '') +
+      (!okEnv ? '\n> ⚠️ O OAuth2 do Discord ainda não foi configurado no bot (variáveis de ambiente `DISCORD_CLIENT_ID`, `DISCORD_CLIENT_SECRET`, `PUBLIC_BASE_URL`). O modo Site padrão KAEL não vai funcionar até isso ser configurado.' : '') +
       '\n-# Aparência, cor, banner, mensagens e o texto do botão continuam sendo os mesmos configurados em **Aparência**/**Botão**/**Mensagens** — a Verificação Web reaproveita tudo isso, só muda o que acontece ao clicar.'))
     .addSeparatorComponents(sep())
     .addActionRowComponents(row(
       btn('vf_web_toggle', w.enabled ? 'Desativar' : 'Ativar', w.enabled ? ButtonStyle.Danger : ButtonStyle.Success),
-      btn('vf_web_mode', w.mode === 'custom' ? 'Usar site padrão KRON' : 'Usar site personalizado'),
+      btn('vf_web_mode', w.mode === 'custom' ? 'Usar site padrão KAEL' : 'Usar site personalizado'),
       ...(w.mode === 'custom' ? [btn('vf_web_url', 'Configurar URL', ButtonStyle.Primary), btn('vf_web_secret', w.customSecretHash ? 'Gerar novo secret' : 'Gerar secret', ButtonStyle.Primary)] : []),
     ))
     .addActionRowComponents(voltarRow());
@@ -1302,12 +1302,12 @@ async function concluirVerificacao(member, g, cfg) {
     if (e) avisos.push(`Cargo adicional ignorado: ${e}`); else if (!add.includes(id)) add.push(id);
   }
   try {
-    await member.roles.add(add, 'KRON Verificação');
+    await member.roles.add(add, 'KAEL Verificação');
   } catch (e) {
     return { ok: false, motivo: `Falha ao atribuir cargos (nenhum cargo foi concedido): ${discordErro(e)}` };
   }
   if (r.removeUnverified && r.unverified && member.roles.cache?.has(r.unverified)) {
-    try { await member.roles.remove(r.unverified, 'KRON Verificação'); }
+    try { await member.roles.remove(r.unverified, 'KAEL Verificação'); }
     catch (e) { avisos.push(`Cargo concedido, mas não foi possível remover o cargo de não verificado: ${discordErro(e)}`); }
   }
   setUserState(g.id, member.id, { state: UserState.VERIFIED, attempts: 0, cooldownUntil: 0, blockedUntil: 0 });

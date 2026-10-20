@@ -97,7 +97,7 @@ async function criarPagamentoPix({ clientId, clientSecret, certificadoPath, senh
   const { accessToken, agent, hostname } = await obterAccessToken({ clientId, clientSecret, certificadoPath, senhaCertificado, sandbox });
 
   // txid: identificador único da cobrança, 26 a 35 caracteres alfanuméricos
-  const txidBruto = `kron${guildId}${clienteId}${Date.now()}`.replace(/[^a-zA-Z0-9]/g, '');
+  const txidBruto = `kael${guildId}${clienteId}${Date.now()}`.replace(/[^a-zA-Z0-9]/g, '');
   const txid = txidBruto.slice(0, 35).padEnd(26, '0');
 
   const cobranca = await requestJson({

@@ -11,12 +11,6 @@ out-tsc
 # dependencies
 node_modules
 
-#env
-.env
-.env.*
-!.env.example
-node_modules/
-
 # IDEs and editors
 /.idea
 .project
@@ -67,3 +61,5 @@ database/licenses.sqlite
 database/database.backup-pre-multi-produto.json
 database/backups/
 *.bak*
+database/*.sqlite
+database/database*.json

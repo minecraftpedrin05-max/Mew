@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // commands/invite.js
 //
-// KRON INVITE SYSTEM — comando /invite (Parte 1 + Parte 2).
+// KAEL INVITE SYSTEM — comando /invite (Parte 1 + Parte 2).
 //
 // Subcomandos:
 //   /invite painel  -> publica/atualiza o painel público no canal atual
@@ -29,7 +29,7 @@ function isAdmin(interaction) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('invite')
-    .setDescription('KRON Invite System')
+    .setDescription('KAEL Invite System')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand(sub => sub.setName('setup').setDescription('Abre o painel administrativo do Invite System (gerencia tudo)')),
 
@@ -83,7 +83,7 @@ module.exports = {
         if (!channel) {
           return interaction.editReply('<:negativo:1528400986744295475> Não encontrei um canal onde eu possa criar convites.');
         }
-        const created = await channel.createInvite({ maxAge: 0, unique: true, reason: `Convite individual — KRON Invite System (${user.id})` });
+        const created = await channel.createInvite({ maxAge: 0, unique: true, reason: `Convite individual — KAEL Invite System (${user.id})` });
         inviteDb.upsertInvite(guild.id, created.code, user.id, 0, null);
         invite = inviteDb.getInvite(guild.id, created.code);
       }

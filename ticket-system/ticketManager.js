@@ -280,7 +280,7 @@ function buildPreviewContainer(cfg, guild) {
   const blocos    = cfg.layoutBlocos  || [];
   const variantes = cfg.variantes     || [];
 
-  // KRON PRO — corrigido: com variantes, o público deve ver um SELECT MENU
+  // KAEL — corrigido: com variantes, o público deve ver um SELECT MENU
   // (dropdown) pra escolher a categoria do ticket, não botões. Antes usava
   // botões limitados a `.slice(0, 5)` — com mais de 5 variantes cadastradas,
   // as demais simplesmente não apareciam (bug). Um StringSelectMenu suporta
@@ -678,7 +678,7 @@ async function modalAddDivisor(interaction) {
 }
 
 /**
- * KRON PRO — corrige a reclamação de "duplicação de texto": antes, a única
+ * KAEL — corrige a reclamação de "duplicação de texto": antes, a única
  * forma de mudar um bloco já existente era clicar em "Add Texto"/"Add
  * Mídia" de novo, que sempre criava um bloco NOVO (vazio) em vez de deixar
  * editar o que já tinha sido digitado — daí a sensação de duplicar texto.
@@ -1660,7 +1660,7 @@ async function handleModal(interaction) {
     return interaction.isFromMessage() ? interaction.update(payload) : interaction.reply(payload);
   }
 
-  // KRON PRO — edição de um bloco JÁ EXISTENTE (via "Gerenciar Estrutura" >
+  // KAEL — edição de um bloco JÁ EXISTENTE (via "Gerenciar Estrutura" >
   // select "editar"), aberto pré-preenchido em modalEditarBloco(). Ao
   // contrário dos handlers de "Add ..." acima (que sempre fazem push de um
   // bloco novo), este SUBSTITUI o bloco no mesmo índice — corrige a

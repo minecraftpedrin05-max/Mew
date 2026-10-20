@@ -135,7 +135,7 @@ CREATE TABLE IF NOT EXISTS migration_meta (
   value TEXT
 );
 
--- KRON INTELLIGENCE — eventos do ciclo de vida do carrinho, pra permitir
+-- KAEL INTELLIGENCE — eventos do ciclo de vida do carrinho, pra permitir
 -- detectar carrinhos abandonados e analisar conversão. Não substitui
 -- "pedidosAtivos" (em memória, sales-system/salesManager.js) — este é um
 -- REGISTRO HISTÓRICO/PERSISTENTE dos mesmos eventos, que sobrevive a
@@ -156,7 +156,7 @@ CREATE TABLE IF NOT EXISTS carrinho_eventos (
 CREATE INDEX IF NOT EXISTS idx_carrinho_guild_status ON carrinho_eventos(guild_id, status);
 CREATE INDEX IF NOT EXISTS idx_carrinho_canal ON carrinho_eventos(canal_id);
 
--- KRON PRO — máquina de estados PERSISTENTE da transação de pagamento de
+-- KAEL — máquina de estados PERSISTENTE da transação de pagamento de
 -- cada carrinho (1 linha por canal de compra). Não substitui
 -- "pedidosAtivos"/"metadadosPedido" (em memória) nem "carrinho_eventos"
 -- (histórico/analytics) — esta tabela é a FONTE DA VERDADE do status da
@@ -191,7 +191,7 @@ CREATE INDEX IF NOT EXISTS idx_transacoes_status_expira ON transacoes_pagamento(
 CREATE INDEX IF NOT EXISTS idx_transacoes_guild ON transacoes_pagamento(guild_id);
 `);
 
-// KRON PRO — OPENPIX (Parte 2): coluna aditiva. Bancos já existentes (de
+// KAEL — OPENPIX (Parte 2): coluna aditiva. Bancos já existentes (de
 // deploys anteriores) já têm a tabela criada sem esta coluna — o
 // `CREATE TABLE IF NOT EXISTS` acima não a adiciona retroativamente,
 // por isso o ALTER TABLE abaixo é necessário. Idempotente: se a coluna
@@ -265,7 +265,7 @@ const stmts = {
     ON CONFLICT(key) DO UPDATE SET value = excluded.value
   `),
 
-  // KRON INTELLIGENCE — carrinho_eventos
+  // KAEL INTELLIGENCE — carrinho_eventos
   insertCarrinho: db.prepare(`
     INSERT INTO carrinho_eventos (guild_id, cliente_id, produto_id, produto_nome, variante_nome, canal_id, status, criado_em, atualizado_em)
     VALUES (@guild_id, @cliente_id, @produto_id, @produto_nome, @variante_nome, @canal_id, 'iniciado', @criado_em, @atualizado_em)
@@ -287,7 +287,7 @@ const stmts = {
   marcarCarrinhoNotificado: db.prepare(`UPDATE carrinho_eventos SET notificado = 1 WHERE id = ?`),
   getCarrinhosPorGuildDesde: db.prepare(`SELECT * FROM carrinho_eventos WHERE guild_id = @guild_id AND criado_em >= @desde ORDER BY criado_em ASC`),
 
-  // KRON PRO — transacoes_pagamento (estado da transação de pagamento)
+  // KAEL — transacoes_pagamento (estado da transação de pagamento)
   upsertTransacaoPendente: db.prepare(`
     INSERT INTO transacoes_pagamento (
       canal_id, transacao_id, guild_id, cliente_id, produto_id, numero_pedido,
@@ -693,7 +693,7 @@ function setMigrationFlag(key, value) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// KRON INTELLIGENCE — funções de carrinho (usadas por commands/produto.js,
+// KAEL INTELLIGENCE — funções de carrinho (usadas por commands/produto.js,
 // sales-system/salesManager.js, commands/intelligence.js e o scheduler de
 // recuperação). Todas isoladas por guild_id — nenhuma consulta cruza dados
 // entre servidores diferentes.
@@ -742,7 +742,7 @@ function getCarrinhosPorGuildDesde(guildId, desdeISO) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// KRON PRO — transacoes_pagamento
+// KAEL — transacoes_pagamento
 // ─────────────────────────────────────────────────────────────────────
 function criarOuReaproveitarTransacaoPendente(dados) {
   stmts.upsertTransacaoPendente.run({
@@ -820,7 +820,7 @@ module.exports = {
   getMigrationFlag,
   setMigrationFlag,
   withTransaction,
-  // KRON INTELLIGENCE
+  // KAEL INTELLIGENCE
   registrarCarrinho,
   atualizarStatusCarrinhoPorCanal,
   getCarrinhoPorCanal,
@@ -828,7 +828,7 @@ module.exports = {
   listarCarrinhosParaNotificar,
   marcarCarrinhoNotificado,
   getCarrinhosPorGuildDesde,
-  // KRON PRO — transacoes_pagamento
+  // KAEL — transacoes_pagamento
   criarOuReaproveitarTransacaoPendente,
   getTransacaoPagamentoPorCanal,
   getTransacaoPagamentoPorId,

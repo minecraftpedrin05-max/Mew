@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────────
- *  KRON PRO — Máquina de estados da transação de pagamento
+ *  KAEL — Máquina de estados da transação de pagamento
  *
  *  Cada carrinho que chega na etapa de QR Code/Pagamento Pendente ganha
  *  UMA linha na tabela `transacoes_pagamento` (database/sqliteDb.js),
@@ -23,7 +23,7 @@
  *  Esta é a ÚNICA fonte de verdade sobre o status da transação. Não
  *  duplica pedidosAtivos/metadadosPedido (em memória, usados só pro
  *  carrinho em si — quantidade, cupom etc.) nem carrinho_eventos
- *  (histórico/analytics do KRON Intelligence).
+ *  (histórico/analytics do KAEL Intelligence).
  * ─────────────────────────────────────────────────────────────────────
  */
 
@@ -31,7 +31,7 @@
 
 const db = require('../database/db');
 
-// Regra fixa do KRON Pro: pagamento pendente por 10 minutos → expiração
+// Regra fixa do KAEL Pro: pagamento pendente por 10 minutos → expiração
 // automática. NÃO existe (e não deve existir) configuração de servidor
 // ou botão de cliente para alterar este valor.
 const DURACAO_EXPIRACAO_MS = 10 * 60 * 1000;

@@ -108,7 +108,7 @@ async execute(message){
           { name: "<:negativo:1528400986744295475> Derrotas",  value: String(s.derrotas), inline: true },
           { name: "🎮 Total",     value: String(total),      inline: true }
         )
-        .setFooter({ text: `${getNome(message.guild)} • Kron Pro`, iconURL: message.guild.iconURL({ dynamic: true }) || undefined })
+        .setFooter({ text: `${getNome(message.guild)} • Kael`, iconURL: message.guild.iconURL({ dynamic: true }) || undefined })
         .setTimestamp()
       ]
     });
@@ -128,7 +128,7 @@ async execute(message){
     return;
   }
 
-  // KRON — Central de Ajuda (!ajuda)
+  // KAEL — Central de Ajuda (!ajuda)
   // Pública, no canal (sem DM), reaproveitando o mesmo handler de
   // mensagens prefixadas e o mesmo padrão visual usado no resto do
   // arquivo. Lista só comandos que realmente existem no projeto.
@@ -140,31 +140,41 @@ async execute(message){
     const thumb = message.guild?.iconURL({ dynamic: true }) || undefined;
     const embed = new EmbedBuilder()
       .setColor(CORES.INFO)
-      .setAuthor({ name: "👑 KRON PRO", iconURL: thumb })
+      .setAuthor({ name: "👑 KAEL", iconURL: thumb })
       .setTitle("Central de Ajuda")
-      .setDescription("Central de ajuda e principais recursos do KRON PRO.")
+      .setDescription("Central de ajuda e principais recursos do KAEL.")
       .addFields(
         { name: "🛒 Vendas", value: "• Sistema de loja\n• Produtos e variantes\n• Estoque\n• Carrinho\n• Pagamentos PIX\n• Entrega automática\n• Pedidos\n• Cupons" },
-        { name: "⚙️ Gerenciamento", value: "• Backup\n• Ranking\n• Gerenciamento de cargos\n• Lock / Unlock\n• Sistema de mensagens\n• Definições" },
+        { name: "⚙️ Gerenciamento", value: "• Kael HUD (backup)\n• Ranking\n• Gerenciamento de cargos\n• Lock / Unlock\n• Sistema de mensagens\n• Definições" },
         { name: "🔐 Segurança", value: "• Sistema de licenças\n• Proteção anti-raid" },
         { name: "🎫 Suporte", value: "• Sistema de tickets\n• Atendimento" },
-        { name: "📋 Principais Comandos", value:
-          "`/painel` — Painel de controle da loja (produtos, tickets, definições)\n" +
-          "`/backup` — Backup e restauração do servidor\n" +
-          "`/ranking` — Ranking de compras do servidor\n" +
-          "`/cargo-id` — Mostra o ID de um cargo\n" +
-          "`/limpar` — Apaga mensagens do canal\n" +
-          "`/lock` — Bloqueia o canal para um cargo\n" +
-          "`/unlock` — Desbloqueia o canal para um cargo\n" +
-          "`!minhascompras` — Seu histórico de compras (comando por prefixo)\n" +
-          "`/mensagem` — Envia uma mensagem pelo bot\n" +
-          "`/ativar` — Ativa a licença do servidor\n"
-        },
-        { name: "💡 Precisa de ajuda?", value: "Consulte os canais de suporte ou abra um ticket caso precise de atendimento." },
       )
-      .setFooter({ text: `${getNome(message.guild)} • Kron Pro`, iconURL: thumb })
+      .setFooter({ text: `${getNome(message.guild)} • Kael`, iconURL: thumb })
       .setTimestamp();
     if (thumb) embed.setThumbnail(thumb);
+    // Lista TODOS os comandos carregados pelo bot (sempre atualizada, sem esquecer nenhum).
+    try {
+      const SO_DONO = new Set(["license", "status"]);
+      const linhas = [];
+      for (const cmd of message.client.commands.values()) {
+        const j = cmd.data?.toJSON?.();
+        if (!j || (j.type && j.type !== 1)) continue; // só slash commands
+        if (SO_DONO.has(j.name)) continue;
+        const subs = (j.options || []).filter(o => o.type === 1).map(o => o.name);
+        linhas.push(`\`/${j.name}\` — ${j.description}${subs.length ? ` (${subs.join(", ")})` : ""}`);
+      }
+      linhas.sort();
+      linhas.push("`!minhascompras` — Seu histórico de compras (comando por prefixo)");
+      let bloco = "", n = 1;
+      const campos = [];
+      for (const l of linhas) {
+        if ((bloco + l + "\n").length > 1000) { campos.push(bloco); bloco = ""; }
+        bloco += l + "\n";
+      }
+      if (bloco) campos.push(bloco);
+      campos.forEach((v, i) => embed.addFields({ name: i === 0 ? "📋 Comandos" : "📋 Comandos (cont.)", value: v }));
+    } catch (e) { console.error("[ajuda] Falha ao listar comandos:", e.message); }
+    embed.addFields({ name: "💡 Precisa de ajuda?", value: "Consulte os canais de suporte ou abra um ticket caso precise de atendimento." });
     await message.reply({ embeds: [embed] });
     return;
   }

@@ -1,5 +1,5 @@
 // ============================================================
-//  commands/carteira.js — /carteira (KRON PRO)
+//  commands/carteira.js — /carteira (KAEL)
 //  Migrado da source antiga (carteira funcional) e adaptado à
 //  arquitetura atual: mesmo banco (database/carteiraDB.js),
 //  mesmo padrão de licença/permissão dos demais comandos

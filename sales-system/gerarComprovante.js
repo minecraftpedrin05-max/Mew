@@ -72,8 +72,8 @@ async function gerarComprovante({ username, avatarURL, produtoNome, produto, pro
   // Rodapé agora é dividido em duas partes: nome do servidor (esquerda,
   // com o ícone dele) e o "site" da marca (direita) — igual à referência
   // ("TSUO · SCRIPTS..." à esquerda, "easebot.app" à direita).
-  const nomeServidor = guildName || footerText || storeName || 'KRON PRO';
-  const site = siteURL || 'kronbot.app';
+  const nomeServidor = guildName || footerText || storeName || 'KAEL';
+  const site = siteURL || process.env.SITE_URL || 'Kael • Bot de Vendas';
 
   let precoFmt = preco ? String(preco).trim() : '??';
   if (precoFmt !== '??' && !precoFmt.toUpperCase().startsWith('R')) {

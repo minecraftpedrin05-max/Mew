@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/applier.js — KRON SERVER TEMPLATES
+//  template-system/core/applier.js — KAEL SERVER TEMPLATES
 //
 //  Executa o plano do preflight, SEQUENCIALMENTE e com intervalo entre as
 //  requisições (nunca dezenas de chamadas simultâneas; o discord.js ainda
@@ -41,7 +41,7 @@ function resolverOverwrites(lista, roleInfo, guildId) {
 }
 
 async function aplicar({ guild, plano, template, executorId, onProgress, deveParar, onEstagio, onRecurso }) {
-  const reason = `KRON Templates — ${template.nome} (solicitado por ${executorId})`.slice(0, 480);
+  const reason = `KAEL Templates — ${template.nome} (solicitado por ${executorId})`.slice(0, 480);
   const res = { criados: { cargos: [], categorias: [], canais: [] }, erros: [], parou: false, abortou: null };
   const totais = {
     cargos: plano.cargos.filter(c => c.acao === 'criar').length,
@@ -68,11 +68,11 @@ async function aplicar({ guild, plano, template, executorId, onProgress, devePar
 
   // Marca o estágio atual (persistido por quem chamou, ex.: para recovery após restart).
   // Nunca deixa um erro de persistência derrubar a aplicação em si.
-  const estagio = (nome) => { try { if (onEstagio) onEstagio(nome); } catch (e) { console.error('[KRON Templates] onEstagio falhou:', e.message); } };
+  const estagio = (nome) => { try { if (onEstagio) onEstagio(nome); } catch (e) { console.error('[KAEL Templates] onEstagio falhou:', e.message); } };
   // Avisa IMEDIATAMENTE que um recurso foi criado (antes de seguir pro próximo),
   // para quem persiste isso conseguir saber com certeza o que já existe mesmo
   // se o processo cair logo em seguida.
-  const criou = (tipo, item) => { try { if (onRecurso) onRecurso(tipo, item); } catch (e) { console.error('[KRON Templates] onRecurso falhou:', e.message); } };
+  const criou = (tipo, item) => { try { if (onRecurso) onRecurso(tipo, item); } catch (e) { console.error('[KAEL Templates] onRecurso falhou:', e.message); } };
 
   const roleInfo = [];
 
@@ -179,7 +179,7 @@ function comBot(ov, me) {
  *  • nunca apaga por nome, nunca varre o servidor.
  */
 async function desfazer({ guild, criados, executorId, onProgress }) {
-  const reason = `KRON Templates — desfazer aplicação (solicitado por ${executorId})`;
+  const reason = `KAEL Templates — desfazer aplicação (solicitado por ${executorId})`;
   const out = { removidos: { canais: 0, categorias: 0, cargos: 0 }, jaNaoExistiam: 0, preservados: [], erros: [] };
   const total = (criados.canais || []).length + (criados.categorias || []).length + (criados.cargos || []).length;
   let feitos = 0;

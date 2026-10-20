@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteEmbed.js
 //
-// KRON INVITE SYSTEM — Parte 2: constrói o embed do painel público a
+// KAEL INVITE SYSTEM — Parte 2: constrói o embed do painel público a
 // partir do embedConfig salvo no banco (cor, título, descrição, imagens,
 // autor, footer, campos) + a seção dinâmica "CONVIDE E GANHE" baseada
 // nas recompensas da campanha ativa. Nunca lança exceção: qualquer campo
@@ -53,7 +53,7 @@ function buildCustomPanelEmbed(guild) {
 
   const embed = new EmbedBuilder().setColor(typeof ec.color === 'number' ? ec.color : CORES.INFO);
 
-  embed.setTitle(applyPlaceholders(ec.title || 'KRON INVITE SYSTEM', placeholderData));
+  embed.setTitle(applyPlaceholders(ec.title || 'KAEL INVITE SYSTEM', placeholderData));
 
   const introPadrao =
     'Convide novos membros, acompanhe seu progresso e conquiste recompensas.\n\n' +

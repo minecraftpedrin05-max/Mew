@@ -24,7 +24,7 @@ function removerPagamento(paymentId) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// KRON PRO — OPENPIX (Parte 2, TAREFA 4): mesmo padrão do Map acima
+// KAEL — OPENPIX (Parte 2, TAREFA 4): mesmo padrão do Map acima
 // (pagamentosAtivos), só que indexado por correlationID da cobrança
 // OpenPix. Guarda os dados do pedido (guildId, clienteId, canalId...)
 // para o webhook conseguir chamar entregarAutomatico quando a OpenPix

@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /status
+ *  KAEL — /status
  *  Altera a presença REAL do bot no Discord (nome da atividade e o
  *  tipo: Jogando, Ouvindo, Assistindo, Transmitindo, Competindo).
  *  Isso é GLOBAL — afeta o bot em todos os servidores ao mesmo tempo,
@@ -40,7 +40,7 @@ module.exports = {
     )
     .addStringOption(o =>
       o.setName('texto')
-        .setDescription('Texto da atividade (ex: KRON PRO)')
+        .setDescription('Texto da atividade (ex: KAEL)')
         .setRequired(true)
         .setMaxLength(128)
     )

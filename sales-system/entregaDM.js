@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — sales-system/entregaDM.js
+ *  KAEL — sales-system/entregaDM.js
  *
  *  Fluxo de acompanhamento do pedido por DM, 100% em MENSAGENS
  *  INDEPENDENTES (channel.send). Nenhuma etapa edita mensagem

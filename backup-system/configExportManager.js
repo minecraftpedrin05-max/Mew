@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Exportar / Importar Configurações
+ *  KAEL — Exportar / Importar Configurações
  *
  *  Reaproveita 100% o banco existente: `db.getGuild(guildId)` já
  *  retorna TODO o nó de dados daquele servidor (loja, produtos,
@@ -17,7 +17,7 @@
  *  do Discord em campos de texto inviabiliza colar um backup
  *  completo). O bot aguarda, por até 2 minutos, uma mensagem do
  *  mesmo usuário que clicou em "Importar" contendo um arquivo
- *  `.kroncfg` anexado, lê o conteúdo direto da URL do anexo, valida,
+ *  `.kaelcfg` (ou `.kroncfg` antigo) anexado, lê o conteúdo direto da URL do anexo, valida,
  *  e só então substitui a configuração.
  *
  *  A licença do servidor (db.licenses[guildId]) fica em uma tabela
@@ -50,7 +50,7 @@ async function exportarAgora(interaction) {
     const dados = db.getGuild(interaction.guildId);
     // JSON minificado (uma única linha) — sem espaços/indentação.
     const jsonMinificado = JSON.stringify(dados);
-    const anexo = new AttachmentBuilder(Buffer.from(jsonMinificado, 'utf8'), { name: 'KRONPRO.kroncfg' });
+    const anexo = new AttachmentBuilder(Buffer.from(jsonMinificado, 'utf8'), { name: 'KAEL.kaelcfg' });
 
     const embed = new EmbedBuilder()
       .setColor(COR.success)
@@ -98,7 +98,7 @@ async function abrirColetaArquivo(interaction) {
 
   await interaction.reply({
     embeds: [new EmbedBuilder().setColor(COR.info).setTitle('<:import1:1533080710544625684> Importar Configurações')
-      .setDescription(`Envie o arquivo \`.kroncfg\` neste canal em até **2 minutos**.\nSó ${interaction.user} pode enviar o arquivo — mensagens de outras pessoas serão ignoradas.`)],
+      .setDescription(`Envie o arquivo \`.kaelcfg\` neste canal em até **2 minutos**.\nSó ${interaction.user} pode enviar o arquivo — mensagens de outras pessoas serão ignoradas.`)],
   });
 
   const canal = interaction.channel;
@@ -128,12 +128,12 @@ async function abrirColetaArquivo(interaction) {
 }
 
 async function processarArquivoImportado(interaction, mensagem) {
-  const anexo = mensagem.attachments.find(a => a.name?.toLowerCase().endsWith('.kroncfg'));
+  const anexo = mensagem.attachments.find(a => a.name?.toLowerCase().endsWith('.kaelcfg') || a.name?.toLowerCase().endsWith('.kroncfg'));
 
   if (!anexo) {
     return mensagem.reply({
       embeds: [new EmbedBuilder().setColor(COR.danger).setTitle('<:negativo:1528400986744295475> Arquivo inválido')
-        .setDescription('> Só é aceito um arquivo com extensão `.kroncfg`. Tente novamente clicando em **Importar Configurações**.')],
+        .setDescription('> Só é aceito um arquivo com extensão `.kaelcfg`. Tente novamente clicando em **Importar Configurações**.')],
     });
   }
 

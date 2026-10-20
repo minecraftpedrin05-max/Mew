@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — utils/painelUpdater.js
+ *  KAEL — utils/painelUpdater.js
  *  Atualizador GLOBAL de painéis/embeds.
  *
  *  Ideia central: cada painel do sistema (Loja, Produtos, Variantes,

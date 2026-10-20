@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Scheduler / Ações Automáticas
+ *  KAEL — Scheduler / Ações Automáticas
  *  Reescrita fiel do AcoesAutomaticas.py (NX7 VENDAS / Ease Pro)
  *
  *  3 sistemas configuráveis via painel:

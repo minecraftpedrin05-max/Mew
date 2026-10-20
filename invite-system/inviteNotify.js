@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteNotify.js
 //
-// KRON INVITE SYSTEM — Parte 2: notificações automáticas de novo convite
+// KAEL INVITE SYSTEM — Parte 2: notificações automáticas de novo convite
 // e recompensa desbloqueada, 100% personalizáveis via notificationsConfig.
 // Nunca lança exceção para fora: falha de canal/permissão só é logada.
 // ═══════════════════════════════════════════════════════════════════════

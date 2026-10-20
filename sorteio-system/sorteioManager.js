@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Sistema de Sorteios
+ *  KAEL — Sistema de Sorteios
  *
  *  Painel completo acionado pelo botão "<:sorteio:1533089699844067418> Sorteios" do /painel.
  *  100% em Components V2 (ContainerBuilder / TextDisplayBuilder /

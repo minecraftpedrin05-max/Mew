@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Card de Boas-Vindas / Saída
+ *  KAEL — Card de Boas-Vindas / Saída
  *  Gera a imagem que acompanha a mensagem de entrada/saída: fundo
  *  (pronto, gerado aleatoriamente ou uma URL customizada) + avatar
  *  circular + nome do usuário na cor escolhida pelo servidor.

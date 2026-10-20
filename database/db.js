@@ -730,9 +730,9 @@ function removerAssinaturaAtiva(guildId, assinaturaId) {
   return antes !== state.ativas.length;
 }
 
-// KRON INTELLIGENCE — repassa direto pra camada SQL (mesmo padrão de
+// KAEL INTELLIGENCE — repassa direto pra camada SQL (mesmo padrão de
 // getLicense/setLicense abaixo, que repassam pra licenseDb).
-// KRON PRO — transacoes_pagamento (estado persistente da transação de pagamento)
+// KAEL — transacoes_pagamento (estado persistente da transação de pagamento)
 function criarOuReaproveitarTransacaoPendente(dados) { return sqliteDb.criarOuReaproveitarTransacaoPendente(dados); }
 function getTransacaoPagamentoPorCanal(canalId) { return sqliteDb.getTransacaoPagamentoPorCanal(canalId); }
 function getTransacaoPagamentoPorId(transacaoId) { return sqliteDb.getTransacaoPagamentoPorId(transacaoId); }
@@ -752,10 +752,10 @@ function getCarrinhosPorGuildDesde(guildId, desdeISO) { return sqliteDb.getCarri
 
 module.exports = {
   load, save, getGuild, setGuild, updateGuild, getLicense, setLicense, removeLicense, hasLicense,
-  // KRON INTELLIGENCE
+  // KAEL INTELLIGENCE
   registrarCarrinho, atualizarStatusCarrinhoPorCanal, getCarrinhoPorCanal,
   listarCarrinhosAbandonados, listarCarrinhosParaNotificar, marcarCarrinhoNotificado, getCarrinhosPorGuildDesde,
-  // KRON PRO — transacoes_pagamento
+  // KAEL — transacoes_pagamento
   criarOuReaproveitarTransacaoPendente, getTransacaoPagamentoPorCanal, getTransacaoPagamentoPorId,
   marcarTransacaoPaga, marcarTransacaoCancelada, marcarTransacaoExpirada, marcarTransacaoRecusada,
   listarTransacoesPendentes,

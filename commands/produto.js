@@ -17,7 +17,7 @@ const COR = { primary: "#FFFFFF", gold: 0xFFD700, success: 0x00FF7F, danger: 0xF
 
 // ─── FOOTER PADRÃO (ícone do servidor + nome) ──────────────────
 // Usado em TODAS as embeds — painel admin e fluxo de cliente.
-// Nunca usar imagem fixa (KRON_IMG) aqui — sempre o ícone real do servidor.
+// Nunca usar imagem fixa (KAEL_IMG) aqui — sempre o ícone real do servidor.
 function footerLoja(guild) {
   const iconURL = guild?.iconURL ? (guild.iconURL({ extension: 'png', size: 256 }) || undefined) : undefined;
   return { text: guild?.name || 'Loja', iconURL };
@@ -578,7 +578,7 @@ function buildConfirmacaoCompraEmbed({ nomeItem, precoStr, cargoId, guild }) {
     .setTitle('Confirmação de compra')
     .setDescription(
       `Para usar os serviços você precisa ler e concordar com nossos ` +
-      `[Termos de Uso](https://kron.systems/termos) e nossas [Políticas de Privacidade](https://kron.systems/privacidade).\n\n` +
+      `Termos de Uso e Políticas de Privacidade${process.env.TERMOS_URL ? ` ([ler](${process.env.TERMOS_URL}))` : ''} da loja.\n\n` +
       `⚠️ Não nos responsabilizamos por perdas de terceiros.\n\n` +
       `🔻 Você está prestes a fazer um pedido de:`
     )
@@ -955,7 +955,7 @@ async function criarCanalCompraEMostrarRevisao(interaction, { varianteKey, nomeI
   try {
     db.registrarCarrinho({ guildId: guild.id, clienteId: user.id, produtoId: produtoId || null, produtoNome: nomeItem, varianteNome: varianteNome || nomeItem, canalId: canal.id });
   } catch (e) {
-    console.error('[KRON Intelligence] Erro ao registrar carrinho:', e.message);
+    console.error('[KAEL Intelligence] Erro ao registrar carrinho:', e.message);
   }
 
   try {
@@ -963,7 +963,7 @@ async function criarCanalCompraEMostrarRevisao(interaction, { varianteKey, nomeI
       guildId: guild.id, clienteId: user.id, produtoId: produtoId || null,
       produtoNome: nomeItem, varianteNome: varianteNome || nomeItem, canalId: canal.id,
     });
-  } catch (e) { console.error('[KRON Intelligence] Falha ao registrar carrinho:', e.message); }
+  } catch (e) { console.error('[KAEL Intelligence] Falha ao registrar carrinho:', e.message); }
 
   const embedRevisao = buildRevisaoEmbedPropria({ user, nomeItem, varianteNome, estoqueTexto, dataCriacao, variante: varianteReal, pedido, guild, produto: produtoDoPedido });
   const componentsRevisao = buildRevisaoComponentsPropria(keyNormalizada);
@@ -1294,7 +1294,7 @@ async function gerarCheckoutPix(interaction) {
   if (openpixCorrelationID) pedido.openpixCorrelationID = openpixCorrelationID;
   console.log('[PIX][AUDITORIA] Payload final:', JSON.stringify(copiaECola));
 
-  try { db.atualizarStatusCarrinhoPorCanal(channel.id, 'pix_gerado'); } catch (e) { console.error('[KRON Intelligence] Falha ao atualizar carrinho:', e.message); }
+  try { db.atualizarStatusCarrinhoPorCanal(channel.id, 'pix_gerado'); } catch (e) { console.error('[KAEL Intelligence] Falha ao atualizar carrinho:', e.message); }
 
   // Registra o pagamento para o webhook do Mercado Pago encontrar os
   // dados do pedido quando a confirmação chegar (entrega automática).
@@ -1312,7 +1312,7 @@ async function gerarCheckoutPix(interaction) {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // KRON PRO — cria (ou reaproveita) a transação PENDING deste carrinho
+  // KAEL — cria (ou reaproveita) a transação PENDING deste carrinho
   // e agenda os 10 minutos fixos de expiração automática. Esta é a
   // fonte da verdade do status da transação a partir daqui — usada nos
   // botões Confirmar/Recusar Pagamento, no cancelamento pelo cliente e
@@ -1360,7 +1360,7 @@ async function gerarCheckoutPix(interaction) {
     const { resolverCanal } = require('../sales-system/salesManager');
     const canalConfirmacao = await resolverCanal(guild, cfg.canalLogsId, 'Confirmação de Pagamento');
     if (canalConfirmacao) {
-      // KRON PRO — reaproveita o MESMO transacaoId gravado na transação
+      // KAEL — reaproveita o MESMO transacaoId gravado na transação
       // persistente (criada acima), em vez de gerar outro aqui — o ID
       // mostrado neste log precisa ser o mesmo usado pra consultar/
       // rastrear a transação (ex.: no cancelamento e na expiração).
@@ -1760,7 +1760,7 @@ async function confirmarPagamentoVariante(interaction) {
     return interaction.reply({ embeds: [new EmbedBuilder().setColor(COR.danger).setTitle('<:negativo:1528400986744295475> Não foi possível identificar o item do pedido.').setDescription('> O canal de compra pode ter sido deletado ou o carrinho expirou.')], flags: 64 });
   }
 
-  // KRON PRO — checagem otimista de estado: evita gastar um deferUpdate +
+  // KAEL — checagem otimista de estado: evita gastar um deferUpdate +
   // tentativa de entrega se a transação já foi fechada (cancelada pelo
   // cliente, expirada ou já paga por outra confirmação). A proteção real
   // (atômica) acontece dentro de entregarAutomatico — isto aqui é só pra
@@ -1810,7 +1810,7 @@ async function recusarPagamentoVariante(interaction) {
   const canalId = partes.pop();
   const clienteId = partes.pop();
 
-  // KRON PRO — transição atômica PENDING -> REFUSED. Se a transação já
+  // KAEL — transição atômica PENDING -> REFUSED. Se a transação já
   // tiver sido fechada por outro caminho (cliente cancelou, expirou, ou
   // já foi paga) enquanto este admin ia clicar, a transição falha e a
   // recusa é abortada — nunca sobrescreve um estado já encerrado.
@@ -1829,7 +1829,7 @@ async function recusarPagamentoVariante(interaction) {
   try {
     db.atualizarStatusCarrinhoPorCanal(canalId, 'cancelado');
   } catch (e) {
-    console.error('[KRON Intelligence] Erro ao atualizar status do carrinho:', e.message);
+    console.error('[KAEL Intelligence] Erro ao atualizar status do carrinho:', e.message);
   }
   const canalCompra = await resolverCanal(interaction.guild, canalId, 'Compra (canal temporário)');
   const meta = metadadosPedido[canalId];
@@ -1842,7 +1842,7 @@ async function recusarPagamentoVariante(interaction) {
     const { removerPagamento } = require('../sales-system/webhook');
     removerPagamento(pedidoRecusado.mpPaymentId);
   }
-  try { db.atualizarStatusCarrinhoPorCanal(canalId, 'cancelado'); } catch (e) { console.error('[KRON Intelligence] Falha ao atualizar carrinho:', e.message); }
+  try { db.atualizarStatusCarrinhoPorCanal(canalId, 'cancelado'); } catch (e) { console.error('[KAEL Intelligence] Falha ao atualizar carrinho:', e.message); }
 
   await interaction.reply({ content: '<:negativo:1528400986744295475> Houve um problema com o pagamento. Aguarde o suporte.', flags: 64 });
 
@@ -1881,7 +1881,7 @@ async function recusarPagamentoVariante(interaction) {
 }
 
 // ─────────────────────────────────────────────────────────────────────
-// KRON PRO — Cancelamento de carrinho com motivo opcional.
+// KAEL — Cancelamento de carrinho com motivo opcional.
 //
 // O clique em "Cancelar Compra" NÃO cancela mais na hora: abre um Modal
 // pedindo o motivo (opcional). O cancelamento de fato só acontece na
@@ -2004,7 +2004,7 @@ async function confirmarCancelamentoComMotivo(interaction) {
 
   limparPedido(canalId);
   try { limparMetadadosPedido(canalId); } catch (e) {}
-  try { db.atualizarStatusCarrinhoPorCanal(canalId, 'cancelado'); } catch (e) { console.error('[KRON Intelligence] Falha ao atualizar carrinho:', e.message); }
+  try { db.atualizarStatusCarrinhoPorCanal(canalId, 'cancelado'); } catch (e) { console.error('[KAEL Intelligence] Falha ao atualizar carrinho:', e.message); }
 
   // ── Log administrativo — o motivo aparece SÓ aqui, nunca no canal do cliente ──
   const cfg = getCfg(interaction.guildId);

@@ -30,8 +30,8 @@ async function criarPagamentoPix({ accessToken, valor, descricao, clienteId, gui
   // mas a compra é feita 100% dentro do Discord (sem coletar e-mail do
   // cliente). Usamos um e-mail sintético baseado no ID do Discord apenas
   // para satisfazer a validação da API — não é usado para envio real.
-  const payerEmail = `discord.${clienteId}@kron-checkout.com`;
-  const idempotencyKey = `kron-${guildId}-${clienteId}-${Date.now()}`;
+  const payerEmail = `discord.${clienteId}@kael-checkout.com`;
+  const idempotencyKey = `kael-${guildId}-${clienteId}-${Date.now()}`;
 
   let resposta;
   try {

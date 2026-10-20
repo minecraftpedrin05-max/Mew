@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteText.js
 //
-// KRON INVITE SYSTEM — Parte 2: motor de placeholders para textos/embeds
+// KAEL INVITE SYSTEM — Parte 2: motor de placeholders para textos/embeds
 // personalizáveis. Usado pelo painel público, notificações e perfil.
 // ═══════════════════════════════════════════════════════════════════════
 

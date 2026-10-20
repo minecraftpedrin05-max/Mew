@@ -1,8 +1,8 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/store.js — KRON SERVER TEMPLATES
+//  template-system/core/store.js — KAEL SERVER TEMPLATES
 //
 //  ÚNICA camada de persistência do sistema de templates. Usa o banco que o
-//  KRON já tem (database/db.js → database.sqlite, que já entra no backup
+//  KAEL já tem (database/db.js → database.sqlite, que já entra no backup
 //  automático do bot). Nenhuma tabela nova, nenhum schema alterado:
 //
 //    POR SERVIDOR  (db.getGuild(guildId).kronTemplates)
@@ -59,7 +59,7 @@ function registrarUso(slug) {
     const uso = { ...usoTodos() };
     uso[slug] = (uso[slug] || 0) + 1;
     db.updateGuild(GLOBAL, 'kronTemplates.uso', uso);
-  } catch (e) { console.error('[KRON Templates] Falha ao registrar uso:', e.message); }
+  } catch (e) { console.error('[KAEL Templates] Falha ao registrar uso:', e.message); }
 }
 
 // ── histórico de aplicações (por servidor) ───────────────────────────────
@@ -119,7 +119,7 @@ function pendentesDoUsuario(userId) {
 
 /** @returns {{ok:boolean, envio?:object, erro?:string}} */
 function criarEnvio({ guildId, userId, template, avisos }) {
-  if (pendentesDoUsuario(userId) >= MAX_PENDENTES_USUARIO) return { ok: false, erro: `Você já tem ${MAX_PENDENTES_USUARIO} templates em análise. Aguarde a revisão da equipe KRON.` };
+  if (pendentesDoUsuario(userId) >= MAX_PENDENTES_USUARIO) return { ok: false, erro: `Você já tem ${MAX_PENDENTES_USUARIO} templates em análise. Aguarde a revisão da equipe KAEL.` };
   if (listarEnvios('pendente').length >= MAX_ENVIOS - 5) return { ok: false, erro: 'A fila de análise está cheia no momento. Tente novamente mais tarde.' };
   const envio = {
     id: novoId(), guildId, userId, criadoEm: new Date().toISOString(), status: 'pendente',

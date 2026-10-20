@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON INTELLIGENCE — Alertas Automáticos (Parte 4)
+ *  KAEL INTELLIGENCE — Alertas Automáticos (Parte 4)
  *
  *  Verifica periodicamente (a cada 30 min) cada servidor com alertas
  *  ativados e manda pro canal configurado (`canalRelatorioId`) só as
@@ -46,7 +46,7 @@ async function processarGuild(client, guildId) {
   try {
     alertas = engine.detectarAlertas(guildId);
   } catch (e) {
-    console.error(`[KRON Intelligence][Alertas] Erro ao detectar alertas na guild ${guildId}:`, e.stack || e);
+    console.error(`[KAEL Intelligence][Alertas] Erro ao detectar alertas na guild ${guildId}:`, e.stack || e);
     return;
   }
   if (alertas.length === 0) return;
@@ -66,7 +66,7 @@ async function processarGuild(client, guildId) {
   const canal = client.channels.cache.get(config.canalRelatorioId)
     || await client.channels.fetch(config.canalRelatorioId).catch(() => null);
   if (!canal) {
-    console.error(`[KRON Intelligence][Alertas] Canal ${config.canalRelatorioId} não encontrado na guild ${guildId} — verifique se ainda existe e se o bot tem permissão.`);
+    console.error(`[KAEL Intelligence][Alertas] Canal ${config.canalRelatorioId} não encontrado na guild ${guildId} — verifique se ainda existe e se o bot tem permissão.`);
     return;
   }
 
@@ -75,7 +75,7 @@ async function processarGuild(client, guildId) {
 
   const embed = new EmbedBuilder()
     .setColor(CORES.AVISO)
-    .setTitle('🧠 KRON Intelligence — Alertas')
+    .setTitle('🧠 KAEL Intelligence — Alertas')
     .setDescription(paraEnviar.slice(0, 10).map(a => `${a.prioridade} **${a.titulo}**\n${a.texto}`).join('\n\n'))
     .setFooter({ text: 'Veja mais detalhes em /insights' })
     .setTimestamp();
@@ -83,7 +83,7 @@ async function processarGuild(client, guildId) {
   try {
     await canal.send({ embeds: [embed] });
   } catch (e) {
-    console.error(`[KRON Intelligence][Alertas] Falha ao enviar alerta no canal ${config.canalRelatorioId} (guild ${guildId}):`, e.message);
+    console.error(`[KAEL Intelligence][Alertas] Falha ao enviar alerta no canal ${config.canalRelatorioId} (guild ${guildId}):`, e.message);
     return;
   }
 
@@ -96,7 +96,7 @@ async function processarTodasGuilds(client) {
   try {
     guildIds = sqliteDb.todosGuildIds();
   } catch (e) {
-    console.error('[KRON Intelligence][Alertas] Erro ao listar guilds:', e.message);
+    console.error('[KAEL Intelligence][Alertas] Erro ao listar guilds:', e.message);
     return;
   }
 
@@ -104,7 +104,7 @@ async function processarTodasGuilds(client) {
     try {
       await processarGuild(client, guildId);
     } catch (e) {
-      console.error(`[KRON Intelligence][Alertas] Erro inesperado na guild ${guildId}:`, e.stack || e);
+      console.error(`[KAEL Intelligence][Alertas] Erro inesperado na guild ${guildId}:`, e.stack || e);
     }
   }
 }

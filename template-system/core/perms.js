@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/perms.js — KRON SERVER TEMPLATES
+//  template-system/core/perms.js — KAEL SERVER TEMPLATES
 //
 //  Tudo sobre permissões num só lugar:
 //    • lista de permissões suportadas (só nomes REAIS do discord.js v14);

@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteRewards.js
 //
-// KRON INVITE SYSTEM — fundação do sistema de recompensas (Parte 1).
+// KAEL INVITE SYSTEM — fundação do sistema de recompensas (Parte 1).
 //
 // Suporta, por enquanto, apenas o tipo "cargo". Campanhas e outros tipos
 // de recompensa entram na Parte 2, reaproveitando esta mesma base.
@@ -59,7 +59,7 @@ async function grantRoleReward(guild, userId, roleId) {
     if (!member) return false;
     if (member.roles.cache.has(roleId)) return true; // já tem
 
-    await member.roles.add(roleId, 'KRON Invite System — recompensa de convites');
+    await member.roles.add(roleId, 'KAEL Invite System — recompensa de convites');
     return true;
   } catch (e) {
     console.error('[InviteSystem] Erro ao conceder cargo de recompensa:', e.message);

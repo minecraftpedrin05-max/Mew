@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteAdminCRUD.js
 //
-// KRON INVITE SYSTEM — Parte 2 (bloco 3): CRUD de Recompensas e Campanhas
+// KAEL INVITE SYSTEM — Parte 2 (bloco 3): CRUD de Recompensas e Campanhas
 // dentro do /invite setup. Se registra em inviteSetupUI.js via
 // registerSectionRenderer/registerButtonHandler/registerModalHandler —
 // nenhum arquivo do bloco 2 precisa ser tocado para isso funcionar.

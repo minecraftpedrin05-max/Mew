@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON INTELLIGENCE — Recuperação de Carrinho (seção 5 do briefing)
+ *  KAEL INTELLIGENCE — Recuperação de Carrinho (seção 5 do briefing)
  *
  *  Verifica periodicamente carrinhos abandonados (tabela carrinho_eventos,
  *  já preenchida pelos hooks em commands/produto.js e
@@ -33,7 +33,7 @@ async function processarRecuperacoes(client) {
   try {
     candidatos = db.listarCarrinhosParaNotificar(MINUTOS_BASE_CONSULTA);
   } catch (e) {
-    console.error('[KRON Intelligence] Erro ao consultar carrinhos pendentes:', e.message);
+    console.error('[KAEL Intelligence] Erro ao consultar carrinhos pendentes:', e.message);
     return;
   }
   if (!candidatos || candidatos.length === 0) return;
@@ -61,13 +61,13 @@ async function processarRecuperacoes(client) {
       try {
         const usuario = await client.users.fetch(carrinho.cliente_id);
         await usuario.send({ content: mensagem });
-        console.log(`[KRON Intelligence] DM de recuperação enviada — guild ${carrinho.guild_id}, cliente ${carrinho.cliente_id}, carrinho #${carrinho.id}.`);
+        console.log(`[KAEL Intelligence] DM de recuperação enviada — guild ${carrinho.guild_id}, cliente ${carrinho.cliente_id}, carrinho #${carrinho.id}.`);
       } catch (e) {
         // Cliente com DM fechada, conta deletada, ou qualquer outro erro de
         // envio — não é uma falha do sistema, é esperado que aconteça às
         // vezes. Só loga e segue (o carrinho ainda é marcado como
         // notificado logo abaixo, pra não tentar de novo pro mesmo cliente).
-        console.log(`[KRON Intelligence] Não foi possível enviar DM de recuperação (${e.message}) — guild ${carrinho.guild_id}, cliente ${carrinho.cliente_id}.`);
+        console.log(`[KAEL Intelligence] Não foi possível enviar DM de recuperação (${e.message}) — guild ${carrinho.guild_id}, cliente ${carrinho.cliente_id}.`);
       }
 
       // Marca como notificado independente do resultado do envio — já
@@ -75,14 +75,14 @@ async function processarRecuperacoes(client) {
       // (evita spam e loop de tentativas pra clientes com DM fechada).
       db.marcarCarrinhoNotificado(carrinho.id);
     } catch (e) {
-      console.error(`[KRON Intelligence] Erro ao processar recuperação do carrinho #${carrinho.id}:`, e.message);
+      console.error(`[KAEL Intelligence] Erro ao processar recuperação do carrinho #${carrinho.id}:`, e.message);
       // Erro num carrinho não pode travar o processamento dos outros.
     }
   }
 }
 
 function iniciarCarrinhoScheduler(client) {
-  console.log(`[KRON Intelligence] Scheduler de recuperação de carrinho ativo (verifica a cada ${INTERVALO_MS / 60000} min).`);
+  console.log(`[KAEL Intelligence] Scheduler de recuperação de carrinho ativo (verifica a cada ${INTERVALO_MS / 60000} min).`);
   setInterval(() => processarRecuperacoes(client), INTERVALO_MS);
 }
 

@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Boas-Vindas
+ *  KAEL — Boas-Vindas
  *  Reescrita fiel do Commands/Admin/Plugins/BoasVindas.py (NX7 VENDAS /
  *  Ease Pro), incluindo o sub-sistema de Auto Role que veio junto no
  *  mesmo arquivo Python original.
@@ -99,7 +99,7 @@ function escolherConteudo(cfg) {
   return cfg.conteudo;
 }
 
-// Busca quem convidou o membro no sistema de Invites (KRON Invite System)
+// Busca quem convidou o membro no sistema de Invites (KAEL Invite System)
 // já existente — não duplicamos lógica de rastreio de convites aqui, só
 // lemos o que aquele sistema já registrou. Se o sistema de Invites estiver
 // desligado nesse servidor, ou o convite não puder ser identificado

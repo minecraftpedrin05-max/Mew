@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /ranking (v2, layout horizontal em linha + paginação real)
+ *  KAEL — /ranking (v2, layout horizontal em linha + paginação real)
  *
  *  O que mudou da versão anterior:
  *   - Layout LITERALMENTE HORIZONTAL: cada posição vira um trecho curto

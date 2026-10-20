@@ -1,6 +1,6 @@
 // ============================================================
 //  payment-system/PaymentProvider.js — Contrato comum de provider
-//  de pagamento (KRON PRO)
+//  de pagamento (KAEL)
 //
 //  TAREFA 6 (Parte 1): apenas arquitetura, SEM nenhum código
 //  fictício da API da OpenPix/Woovi. Nenhum endpoint, payload,

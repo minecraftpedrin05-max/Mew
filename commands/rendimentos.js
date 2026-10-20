@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Rendimentos
+ *  KAEL — Rendimentos
  *  Reescrita fiel do Rendimentos.py (NX7 VENDAS / Ease Pro)
  *  + botão Voltar ao painel
  *

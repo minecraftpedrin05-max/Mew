@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  KRON PRO — SISTEMA DE PROTEÇÃO (ARQUIVO ÚNICO CONSOLIDADO)
+ *  KAEL — SISTEMA DE PROTEÇÃO (ARQUIVO ÚNICO CONSOLIDADO)
  * ═══════════════════════════════════════════════════════════════════
  *
  *  Este arquivo junta em um só lugar tudo que originalmente estava
@@ -48,7 +48,7 @@ const {
 const PDB = (function() {
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Sistema de Proteção — Camada de Banco (SQLite)
+ *  KAEL — Sistema de Proteção — Camada de Banco (SQLite)
  *
  *  Único ponto de acesso ao banco SQLite do Sistema de Proteção.
  *  Nenhum outro arquivo do projeto deve importar `better-sqlite3`
@@ -57,7 +57,7 @@ const PDB = (function() {
  *  em um só lugar.
  *
  *  Por que um banco separado do resto do bot (database/db.js)?
- *  O restante do KRON PRO (loja, sorteios, tickets) usa JSON e
+ *  O restante do KAEL (loja, sorteios, tickets) usa JSON e
  *  continua usando JSON — isso NÃO foi alterado. O Sistema de
  *  Proteção foi pedido explicitamente em SQLite (better-sqlite3),
  *  então ele vive em seu próprio arquivo .sqlite, sem interferir
@@ -509,7 +509,7 @@ function getAllQuarantinedGlobal() {
 const Manager = (function() {
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Sistema de Proteção
+ *  KAEL — Sistema de Proteção
  *
  *  Painel acionado pelo botão "<:safety:1528841000548569239> Sistema de Proteção" do /painel.
  *  100% em Components V2, seguindo o mesmo padrão visual de
@@ -1190,7 +1190,7 @@ async function handleModal(interaction) {
 const RaidDetector = (function() {
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Proteção: guildMemberAdd (Anti Raid / Mass Join / Bot / Fake)
+ *  KAEL — Proteção: guildMemberAdd (Anti Raid / Mass Join / Bot / Fake)
  *
  *  Detecta em memória (janela deslizante por guild) entradas em massa,
  *  contas novas e bots entrando — sem usar variáveis para CONFIGURAÇÃO
@@ -1324,7 +1324,7 @@ async function colocarEmQuarentenaSeguro(guild, member, motivo) {
 const MessageDetector = (function() {
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Proteção: messageCreate / messageDelete
+ *  KAEL — Proteção: messageCreate / messageDelete
  *  (Anti Spam, Anti Flood, Anti Link, Anti Convite, Anti Scam,
  *   Anti Mention, Anti Ghost Ping)
  *
@@ -1530,7 +1530,7 @@ async function handleMessageDelete(message) {
 const ServerDetector = (function() {
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Proteção: eventos de servidor
+ *  KAEL — Proteção: eventos de servidor
  *  (Anti Channel/Role/Emoji Create/Update/Delete, Anti Webhook,
  *   Anti Permission Abuse)
  *
@@ -1722,7 +1722,7 @@ async function handleWebhooksUpdate(channel) {
 const Scheduler = (function() {
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — Scheduler de Liberação de Quarentena
+ *  KAEL — Scheduler de Liberação de Quarentena
  *
  *  Mesmo padrão de handlers/scheduler.js e handlers/sorteioScheduler.js:
  *  timers em memória (Map), resistente a restart (reagenda tudo na

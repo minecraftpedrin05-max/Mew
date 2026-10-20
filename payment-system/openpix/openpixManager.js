@@ -5,7 +5,7 @@
 //  Modelo (confirmado com o cliente no pedido, implementado só com
 //  endpoints documentados — ver openpixClient.js):
 //
-//    KRON → 1 conta principal OpenPix (appID em OPENPIX_APP_ID, global)
+//    KAEL → 1 conta principal OpenPix (appID em OPENPIX_APP_ID, global)
 //            → 1 subconta por servidor (guildId ↔ subaccount.pixKey)
 //                → saldo isolado por servidor (GET /subaccount/{pixKey})
 //
@@ -100,7 +100,7 @@ async function criarPagamentoPix({ valor, descricao, clienteId, guildId }) {
   if (isNaN(valorNum) || valorNum <= 0) throw new Error('Valor inválido para gerar o pagamento PIX.');
   const valorCentavos = Math.round(valorNum * 100);
 
-  const correlationID = `kron-${guildId}-${clienteId}-${Date.now()}`;
+  const correlationID = `kael-${guildId}-${clienteId}-${Date.now()}`;
   const charge = await client.criarCobranca({
     correlationID,
     valorCentavos,

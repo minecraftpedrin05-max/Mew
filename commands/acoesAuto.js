@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Ações Automáticas (Painel)
+ *  KAEL — Ações Automáticas (Painel)
  *  Reescrita fiel do AcoesAutomaticas.py (NX7 VENDAS / Ease Pro)
  *
  *  Acionado por: botão 'painel_sorteios' NO PAINEL (temporário)

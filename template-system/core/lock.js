@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/lock.js — KRON SERVER TEMPLATES
+//  template-system/core/lock.js — KAEL SERVER TEMPLATES
 //
 //  Trava em memória por servidor. Garante que só UMA operação de template
 //  (aplicar OU desfazer) rode por vez em cada guild.

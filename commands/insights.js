@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  commands/insights.js — KRON INTELLIGENCE
+//  commands/insights.js — KAEL INTELLIGENCE
 // ═══════════════════════════════════════════════════════════════════════════
 //
 //  Painel único (Components V2, mesma arquitetura do ticket-system/painel.js)
@@ -331,7 +331,7 @@ function montarComponentes(pagina, guildId, dias, config, modoCanal) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('insights')
-    .setDescription('KRON Intelligence — painel de análise da loja')
+    .setDescription('KAEL Intelligence — painel de análise da loja')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {

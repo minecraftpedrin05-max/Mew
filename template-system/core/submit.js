@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/submit.js — KRON SERVER TEMPLATES
+//  template-system/core/submit.js — KAEL SERVER TEMPLATES
 //
 //  Templates da comunidade:
 //    • baixarEValidar(): lê o JSON enviado pelo usuário (anexo do Discord), higieniza

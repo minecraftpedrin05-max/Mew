@@ -1,6 +1,6 @@
 /**
  * ═══════════════════════════════════════════════════════════════════
- *  KRON PRO — SISTEMA DE LICENÇAS (camada Better-SQLite3)
+ *  KAEL — SISTEMA DE LICENÇAS (camada Better-SQLite3)
  * ═══════════════════════════════════════════════════════════════════
  *
  *  Único ponto de acesso ao banco SQLite do sistema de licenças.
@@ -186,7 +186,7 @@ function nowISO() { return new Date().toISOString(); }
 
 function gerarChave() {
   const bloco = () => Math.random().toString(36).slice(2, 6).toUpperCase();
-  return `KRON-${bloco()}-${bloco()}-${bloco()}`;
+  return `KAEL-${bloco()}-${bloco()}-${bloco()}`;
 }
 
 // ═══════════════════════════════════════════════════════════════════

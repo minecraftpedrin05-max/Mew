@@ -121,7 +121,7 @@ function removerCupom(guildId, produtoId, codigo) {
 }
 
 /** Chamado no mesmo instante em que o cupom é aplicado no carrinho —
- * preserva o timing exato de incremento que o KRON PRO já usava antes
+ * preserva o timing exato de incremento que o KAEL já usava antes
  * deste sistema existir (não espera a confirmação do pagamento). */
 function registrarUso(guildId, produtoId, codigo) {
   const cupons = getCupons(guildId, produtoId);

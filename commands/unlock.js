@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /unlock
+ *  KAEL — /unlock
  *  Desbloqueia o canal atual para um cargo específico (restaura a
  *  permissão de enviar mensagens desse cargo neste canal).
  * ─────────────────────────────────────────────────────────────────

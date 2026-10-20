@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteSetupUI.js
 //
-// KRON INVITE SYSTEM — Parte 2: painel administrativo (/invite setup).
+// KAEL INVITE SYSTEM — Parte 2: painel administrativo (/invite setup).
 //
 // Seções deste arquivo (núcleo): Aparência, Botões, Convites, Anti-Fraude,
 // Notificações. Recompensas e Campanhas são adicionadas pelo bloco 3
@@ -60,7 +60,7 @@ function on(bool) { return bool ? '✅ Ativado' : '❌ Desativado'; }
 function buildMainMenuEmbed(guild) {
   return new EmbedBuilder()
     .setColor(CORES.PRIMARIA)
-    .setTitle('⚙️ KRON Invite System — Painel Administrativo')
+    .setTitle('⚙️ KAEL Invite System — Painel Administrativo')
     .setDescription('Selecione uma seção abaixo para configurar.\n\nNenhuma alteração aqui afeta o histórico já registrado.')
     .setImage('https://i.imgur.com/lgqZ3T9.png')
     .setFooter({ text: guild.name });

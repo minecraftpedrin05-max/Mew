@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteFraud.js
 //
-// KRON INVITE SYSTEM — camada inicial de proteção contra fraude (Parte 1).
+// KAEL INVITE SYSTEM — camada inicial de proteção contra fraude (Parte 1).
 //
 // Apenas MARCA registros como suspeitos (`suspicious = true`). Nunca
 // bane, expulsa ou toma qualquer ação destrutiva automaticamente — a

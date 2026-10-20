@@ -102,7 +102,7 @@ function getPedido(channelId) {
   return pedidosAtivos[channelId];
 }
 
-// KRON PRO — limpa o pedido em memória de um canal (cancelamento/expiração/
+// KAEL — limpa o pedido em memória de um canal (cancelamento/expiração/
 // entrega). Exportado pra quem não pode/deve mexer direto no objeto
 // `pedidosAtivos` (privado deste módulo), como o cancelamento com motivo e
 // o scheduler de expiração automática.
@@ -194,7 +194,7 @@ function gerarPixCopiaCola(chave, valor) {
     campo('53', '986') +      // Transaction Currency (BRL)
     valorCampo +               // Transaction Amount
     campo('58', 'BR') +       // Country Code
-    campo('59', 'KRON PRO') +   // Merchant Name
+    campo('59', 'KAEL') +   // Merchant Name
     campo('60', 'BRASIL') +   // Merchant City
     campo('62', campo('05', '***')); // Additional Data
 
@@ -790,7 +790,7 @@ async function entregarAutomatico({ client, guildId, clienteId, varianteKey, can
   _entregasEmAndamento.add(_chave);
   try {
     // ─────────────────────────────────────────────────────────────────
-    // KRON PRO — proteção de estado da transação: TODA confirmação de
+    // KAEL — proteção de estado da transação: TODA confirmação de
     // pagamento (webhook Mercado Pago, poller Efi/C6 Bank, botão manual
     // "Confirmar Pagamento") passa por aqui. Se este canal tem uma
     // transação rastreada, só entrega quando ela ainda está PENDING —
@@ -1001,14 +1001,14 @@ async function entregarAutomatico({ client, guildId, clienteId, varianteKey, can
       try {
         db.atualizarStatusCarrinhoPorCanal(canalId, 'pago');
       } catch (e) {
-        console.error('[KRON Intelligence] Erro ao atualizar status do carrinho:', e.message);
+        console.error('[KAEL Intelligence] Erro ao atualizar status do carrinho:', e.message);
       }
     }
 
     const clienteUser = await client.users.fetch(clienteId).catch(() => null);
 
     // ─────────────────────────────────────────────────────────────────
-    // KRON PRO — CARTEIRA: este é o ÚNICO ponto do sistema onde o saldo
+    // KAEL — CARTEIRA: este é o ÚNICO ponto do sistema onde o saldo
     // do servidor é creditado. Chegar até aqui já significa que:
     //   1) o webhook do Mercado Pago confirmou status "approved" (via
     //      consultarPagamento), OU o poller do Efi Bank/C6 Bank confirmou

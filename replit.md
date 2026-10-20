@@ -1,4 +1,4 @@
-# Kron Pro — Discord Bot
+# Kael — Discord Bot
 
 ## Visão geral
 Bot de Discord (Node.js + discord.js v14) para gerenciamento de loja virtual dentro de servidores Discord. Funcionalidades:
@@ -39,4 +39,4 @@ Pagamentos opcionais (configuravelmente por `/produto criar`):
 - `handlers/` — schedulers, filas, atualizações periódicas
 
 ## Preferências do usuário
-- Nome do bot/marca: **Kron Pro** (não "Vortex Store")
+- Nome do bot/marca: **Kael** (não "Vortex Store")

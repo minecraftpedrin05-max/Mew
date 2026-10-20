@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // database/inviteDb.js
 //
-// KRON INVITE SYSTEM — camada de persistência (Parte 1).
+// KAEL INVITE SYSTEM — camada de persistência (Parte 1).
 //
 // Usa better-sqlite3, exatamente como o resto do projeto (database/
 // sqliteDb.js), mas em arquivo próprio (invites.sqlite) para não misturar

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  backupManager.js — Sistema de Backup & Restauração de Servidor
+//  backupManager.js — Kael HUD (Backup & Restauração de Servidor)
 //  (Components V2, Discord.js v14) — módulo NOVO e independente.
 // ═══════════════════════════════════════════════════════════════════════════
 //
@@ -30,8 +30,10 @@ const {
   ActionRowBuilder, ButtonBuilder, ButtonStyle,
   StringSelectMenuBuilder, ModalBuilder, TextInputBuilder, TextInputStyle,
   ChannelType, ContainerBuilder, TextDisplayBuilder, SeparatorBuilder,
+  SeparatorSpacingSize, MediaGalleryBuilder, MediaGalleryItemBuilder,
   MessageFlags,
 } = require('discord.js');
+const { bannerFile, BANNER_ATTACH_URL } = require('../utils/branding');
 
 const db = require('../database/db');
 
@@ -41,8 +43,23 @@ const db = require('../database/db');
 const COR = {
   SUCCESS: 0x57F287,
   DANGER : 0xED4245,
-  GOLD   : 0xFFD700,
+  GOLD   : 0x000000, // visual KAEL: container preto
 };
+
+const E = {
+  escudo : '<:safety:1528841000548569239>',
+  salvar : '<:save:1533080403810713773>',
+  pasta  : '<:folder:1533259504936816641>',
+  relogio: '<:clock:1524207889441357917>',
+  ok     : '<:positivo:1528401238197276702>',
+  erro   : '<:negativo:1528400986744295475>',
+  apagar : '<:apagar:1524206738885050388>',
+  lista  : '<:embed:1528400492982571111>',
+};
+
+const MAX_BACKUPS = 5;
+const INTERVALO_AUTO_HORAS = 6;
+const FLAGS_V2 = MessageFlags.Ephemeral | MessageFlags.IsComponentsV2;
 
 function errContainer(texto) {
   return {
@@ -170,7 +187,7 @@ async function restaurarSnapshot(guild, snapshot) {
         hoist: !!r.hoist,
         mentionable: !!r.mentionable,
         permissions: BigInt(r.permissions || '0'),
-        reason: 'Restauração de backup — KRON PRO',
+        reason: 'Restauração de backup — KAEL',
       });
       nomeParaRoleId.set(r.nome, novo.id);
       resultado.cargosCriados++;
@@ -186,7 +203,7 @@ async function restaurarSnapshot(guild, snapshot) {
       const nova = await guild.channels.create({
         name: c.nome, type: ChannelType.GuildCategory,
         permissionOverwrites: overwrites,
-        reason: 'Restauração de backup — KRON PRO',
+        reason: 'Restauração de backup — KAEL',
       });
       nomeParaCategoriaId.set(c.nome, nova.id);
       resultado.categoriasCriadas++;
@@ -207,7 +224,7 @@ async function restaurarSnapshot(guild, snapshot) {
         topic: c.topico || undefined,
         nsfw: c.nsfw || false,
         permissionOverwrites: overwrites,
-        reason: 'Restauração de backup — KRON PRO',
+        reason: 'Restauração de backup — KAEL',
       });
       resultado.canaisCriados++;
     } catch (e) { resultado.erros.push(`Canal "${c.nome}": ${e.message}`); }
@@ -218,7 +235,7 @@ async function restaurarSnapshot(guild, snapshot) {
   for (const e of (snapshot.emojis || [])) {
     try {
       if (guild.emojis.cache.some(x => x.name === e.nome)) continue;
-      await guild.emojis.create({ attachment: e.url, name: e.nome, reason: 'Restauração de backup — KRON PRO' });
+      await guild.emojis.create({ attachment: e.url, name: e.nome, reason: 'Restauração de backup — KAEL' });
       resultado.emojisCriados++;
     } catch (e2) { resultado.erros.push(`Emoji "${e.nome}": ${e2.message}`); }
   }
@@ -227,124 +244,114 @@ async function restaurarSnapshot(guild, snapshot) {
 }
 
 // ─────────────────────────────────────────────────────────────
-//  5. BUILDERS DE CONTAINER (Components V2)
+//  5. BUILDERS DE CONTAINER (Components V2) — visual Kael HUD
 // ─────────────────────────────────────────────────────────────
 
-function buildPainelContainer(guild, statusMsg = null) {
-  const state = db.getBackupState(guild.id);
-  const totalSnapshots = (state.snapshots || []).length;
-  const totalTemplates = Object.keys(state.templates || {}).length;
-  const ultimo = (state.snapshots || [])[state.snapshots.length - 1];
+const sep = (divider = true) => new SeparatorBuilder().setDivider(divider).setSpacing(SeparatorSpacingSize.Small);
+const txt = (t) => new TextDisplayBuilder().setContent(t);
 
-  const container = new ContainerBuilder().setAccentColor(COR.GOLD);
-
-  if (statusMsg) {
-    container.addTextDisplayComponents(new TextDisplayBuilder().setContent(statusMsg));
-    container.addSeparatorComponents(new SeparatorBuilder().setDivider(true));
-  }
-
-  container.addTextDisplayComponents(
-    new TextDisplayBuilder().setContent(
-      `## <:save:1533080403810713773> Backup & Restauração do Servidor\n` +
-      `> Salva canais, categorias, cargos, permissões e emojis para reconstruir o servidor ` +
-      `rapidamente em caso de nuke, raid ou exclusão acidental. A restauração nunca apaga nada — só cria o que faltar.`
-    )
-  );
-  container.addSeparatorComponents(new SeparatorBuilder().setDivider(false));
-  container.addTextDisplayComponents(
-    new TextDisplayBuilder().setContent(
-      `**<:import1:1533080710544625684> Snapshots salvos:** \`${totalSnapshots}/5\`\n` +
-      `**<:block:1533259816871657522> Templates salvos:** \`${totalTemplates}\`\n` +
-      `**<:clock:1524207889441357917> Último snapshot:** ${ultimo ? tsRelativo(ultimo.criadoEm) : 'Nenhum ainda'}`
-    )
-  );
-
-  container.addActionRowComponents(
-    new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('bkp_criar_snapshot').setLabel('Criar Backup Agora').setEmoji('<:import1:1533080710544625684>').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId('bkp_modal_template').setLabel('Salvar como Template').setEmoji('<:block:1533259816871657522>').setStyle(ButtonStyle.Primary),
-    )
-  );
-  container.addActionRowComponents(
-    new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('bkp_listar_snapshots').setLabel('Ver Snapshots').setEmoji('<:embed:1528400492982571111>').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('bkp_listar_templates').setLabel('Ver Templates').setEmoji('<:folder:1533259504936816641>').setStyle(ButtonStyle.Secondary),
-    )
-  );
-
-  return container;
+function getAuto(guildId) {
+  const st = db.getBackupState(guildId);
+  return st.auto || { enabled: false, intervaloHoras: INTERVALO_AUTO_HORAS, ultimoEm: null };
 }
 
-function buildListaContainer(itens, tipo) {
-  // tipo: 'snapshot' | 'template'
-  const container = new ContainerBuilder().setAccentColor(COR.GOLD);
-  if (itens.length === 0) {
-    container.addTextDisplayComponents(new TextDisplayBuilder().setContent(
-      tipo === 'snapshot' ? '> Nenhum snapshot salvo ainda.' : '> Nenhum template salvo ainda.'
-    ));
-    container.addActionRowComponents(new ActionRowBuilder().addComponents(botaoVoltar()));
-    return container;
-  }
+function textoStatus(guildId) {
+  const state = db.getBackupState(guildId);
+  const snaps = state.snapshots || [];
+  const auto = getAuto(guildId);
+  const ultimo = snaps[snaps.length - 1];
+  const linhaAuto = auto.enabled
+    ? `**Backup automático:** ligado (a cada ${auto.intervaloHoras || INTERVALO_AUTO_HORAS}h)`
+    : `**Backup automático:** desligado`;
+  if (!ultimo) return `Nenhum backup salvo ainda. Toque em **Salvar agora**.\n${linhaAuto}`;
+  return `**Último backup:** ${tsRelativo(ultimo.criadoEm)} • \`${snaps.length}/${MAX_BACKUPS}\` salvos\n` +
+         `\`${ultimo.totalCargos}\` cargos • \`${ultimo.totalCategorias}\` categorias • \`${ultimo.totalCanais}\` canais\n${linhaAuto}`;
+}
 
-  container.addTextDisplayComponents(new TextDisplayBuilder().setContent(
-    tipo === 'snapshot' ? '## <:embed:1528400492982571111> Snapshots Salvos\n> Selecione um para ver detalhes, restaurar ou apagar.'
-                        : '## <:folder:1533259504936816641> Templates Salvos\n> Selecione um para ver detalhes, restaurar ou apagar.'
+/** Painel principal: texto, banner, status e 3 botões. Sempre leva o banner como anexo. */
+function buildHudPayload(guild, statusMsg = null, { edicao = false } = {}) {
+  const auto = getAuto(guild.id);
+  const c = new ContainerBuilder().setAccentColor(COR.GOLD);
+  if (statusMsg) { c.addTextDisplayComponents(txt(statusMsg)); c.addSeparatorComponents(sep(true)); }
+  c.addTextDisplayComponents(txt(
+    `# ${E.escudo} Kael HUD\n` +
+    `Salva **cargos, categorias, canais e permissões** do servidor. Se alguém destruir tudo, é só restaurar por aqui.`
   ));
+  c.addSeparatorComponents(sep(true));
+  c.addMediaGalleryComponents(new MediaGalleryBuilder().addItems(
+    new MediaGalleryItemBuilder().setURL(BANNER_ATTACH_URL).setSpoiler(false)
+  ));
+  c.addSeparatorComponents(sep(true));
+  c.addTextDisplayComponents(txt(textoStatus(guild.id)));
+  c.addActionRowComponents(new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('bkp_criar_snapshot').setLabel('Salvar agora').setEmoji(E.salvar).setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId('bkp_listar_snapshots').setLabel('Backups e restaurar').setEmoji(E.pasta).setStyle(ButtonStyle.Secondary),
+  ));
+  c.addActionRowComponents(new ActionRowBuilder().addComponents(
+    new ButtonBuilder().setCustomId('bkp_toggle_auto')
+      .setLabel(auto.enabled ? 'Desligar automático' : 'Ligar automático')
+      .setEmoji(E.relogio).setStyle(auto.enabled ? ButtonStyle.Success : ButtonStyle.Secondary),
+  ));
+  const payload = { components: [c], files: [bannerFile()], flags: FLAGS_V2 };
+  // Ao editar uma mensagem que já tem o banner, troca o anexo antigo pelo novo (não acumula).
+  if (edicao) payload.attachments = [];
+  return payload;
+}
 
+function buildListaContainer(itens) {
+  const c = new ContainerBuilder().setAccentColor(COR.GOLD);
+  if (itens.length === 0) {
+    c.addTextDisplayComponents(txt(`## ${E.pasta} Backups e restaurar\nNenhum backup salvo ainda. Volte e toque em **Salvar agora**.`));
+    c.addActionRowComponents(new ActionRowBuilder().addComponents(botaoVoltar()));
+    return c;
+  }
+  c.addTextDisplayComponents(txt(`## ${E.pasta} Backups e restaurar\nEscolha um backup para ver os detalhes, restaurar ou apagar.`));
+  c.addSeparatorComponents(sep(true));
   const select = new StringSelectMenuBuilder()
-    .setCustomId(tipo === 'snapshot' ? 'bkp_sel_snapshot' : 'bkp_sel_template')
-    .setPlaceholder('Selecione um item...')
+    .setCustomId('bkp_sel_snapshot')
+    .setPlaceholder('Selecione um backup...')
     .addOptions(itens.slice(0, 25).map(item => ({
-      label: (item.nome ? `${item.nome}` : `Snapshot de ${new Date(item.criadoEm).toLocaleDateString('pt-BR')}`).slice(0, 100),
-      description: `${item.totalCanais} canais • ${item.totalCargos} cargos • ${item.totalEmojis} emojis`.slice(0, 100),
+      label: (item.nome || `Backup de ${new Date(item.criadoEm).toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })}`).slice(0, 100),
+      description: `${item.totalCargos} cargos • ${item.totalCategorias} categorias • ${item.totalCanais} canais`.slice(0, 100),
       value: item.id,
     })));
-
-  container.addActionRowComponents(new ActionRowBuilder().addComponents(select));
-  container.addActionRowComponents(new ActionRowBuilder().addComponents(botaoVoltar()));
-  return container;
+  c.addActionRowComponents(new ActionRowBuilder().addComponents(select));
+  c.addActionRowComponents(new ActionRowBuilder().addComponents(botaoVoltar()));
+  return c;
 }
 
-function buildDetalheContainer(item, tipo) {
-  const idOuNome = item.id;
-  const container = new ContainerBuilder()
-    .setAccentColor(COR.GOLD)
-    .addTextDisplayComponents(new TextDisplayBuilder().setContent(
-      `## ${tipo === 'snapshot' ? '<:import1:1533080710544625684>' : '<:block:1533259816871657522>'} ${item.nome || 'Snapshot'}\n` +
-      `**Criado em:** ${tsRelativo(item.criadoEm)}\n` +
+function buildDetalheContainer(item) {
+  return new ContainerBuilder().setAccentColor(COR.GOLD)
+    .addTextDisplayComponents(txt(
+      `## ${E.salvar} Backup de ${tsRelativo(item.criadoEm)}\n` +
       `**Servidor original:** \`${item.guildNomeOriginal}\`\n\n` +
-      `**Cargos:** \`${item.totalCargos}\`\n` +
-      `**Categorias:** \`${item.totalCategorias}\`\n` +
-      `**Canais:** \`${item.totalCanais}\`\n` +
-      `**Emojis:** \`${item.totalEmojis}\`\n\n` +
-      `⚠️ A restauração é **aditiva** — recria apenas o que não existir mais no servidor (comparando pelo nome). Nada é apagado ou substituído.`
+      `**Cargos:** \`${item.totalCargos}\`\n**Categorias:** \`${item.totalCategorias}\`\n` +
+      `**Canais:** \`${item.totalCanais}\`\n**Emojis:** \`${item.totalEmojis}\`\n\n` +
+      `-# A restauração só cria o que está faltando (comparando pelo nome). Nada é apagado ou substituído.`
     ))
-    .addActionRowComponents(
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`bkp_confirmar_restaurar_${tipo}_${idOuNome}`).setLabel('Restaurar').setEmoji('♻️').setStyle(ButtonStyle.Success),
-        new ButtonBuilder().setCustomId(`bkp_apagar_${tipo}_${idOuNome}`).setLabel('Apagar').setEmoji('<:apagar:1524206738885050388>').setStyle(ButtonStyle.Danger),
-        botaoVoltar(),
-      )
-    );
-  return container;
+    .addActionRowComponents(new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`bkp_confirmar_restaurar_snapshot_${item.id}`).setLabel('Restaurar').setEmoji(E.salvar).setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId(`bkp_apagar_snapshot_${item.id}`).setLabel('Apagar').setEmoji(E.apagar).setStyle(ButtonStyle.Danger),
+      botaoVoltarLista(),
+    ));
 }
 
-function buildConfirmarContainer(item, tipo) {
-  const idOuNome = item.id;
-  return new ContainerBuilder()
-    .setAccentColor(COR.DANGER)
-    .addTextDisplayComponents(new TextDisplayBuilder().setContent(
-      `## ⚠️ Confirmar Restauração\n` +
-      `Isso vai criar no servidor **tudo que estiver faltando** de:\n` +
-      `\`${item.totalCargos}\` cargos, \`${item.totalCategorias}\` categorias, \`${item.totalCanais}\` canais e \`${item.totalEmojis}\` emojis.\n\n` +
-      `Nada existente será apagado ou sobrescrito. Isso pode levar alguns segundos. Confirmar?`
+function buildConfirmarContainer(item) {
+  return new ContainerBuilder().setAccentColor(COR.DANGER)
+    .addTextDisplayComponents(txt(
+      `## ⚠️ Confirmar restauração\n` +
+      `Vou criar o que estiver faltando: \`${item.totalCargos}\` cargos, \`${item.totalCategorias}\` categorias, ` +
+      `\`${item.totalCanais}\` canais e \`${item.totalEmojis}\` emojis.\n\n` +
+      `Nada existente será apagado ou sobrescrito. Pode levar alguns segundos. Confirmar?`
     ))
-    .addActionRowComponents(
-      new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`bkp_executar_restaurar_${tipo}_${idOuNome}`).setLabel('Sim, restaurar').setEmoji('♻️').setStyle(ButtonStyle.Danger),
-        botaoVoltar(),
-      )
-    );
+    .addActionRowComponents(new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`bkp_executar_restaurar_snapshot_${item.id}`).setLabel('Sim, restaurar').setEmoji(E.salvar).setStyle(ButtonStyle.Danger),
+      botaoVoltarLista(),
+    ));
+}
+
+function botaoVoltarLista() {
+  return new ButtonBuilder().setCustomId('bkp_listar_snapshots').setLabel('Voltar').setEmoji('<:voltar:1528548726518448198>').setStyle(ButtonStyle.Secondary);
 }
 
 // ─────────────────────────────────────────────────────────────
@@ -352,157 +359,150 @@ function buildConfirmarContainer(item, tipo) {
 // ─────────────────────────────────────────────────────────────
 
 async function showAdminPanel(interaction) {
-  await interaction.reply({
-    components: [buildPainelContainer(interaction.guild)],
-    flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-  });
+  await interaction.reply(buildHudPayload(interaction.guild));
+}
+
+/** Salva um backup (usado pelo botão e pelo agendador automático). */
+async function salvarBackup(guild, userId = null) {
+  const snapshot = await capturarSnapshot(guild);
+  return db.salvarSnapshot(guild.id, { ...snapshot, criadoPor: userId });
 }
 
 async function criarSnapshotAgora(interaction) {
   await interaction.deferUpdate();
   try {
-    const snapshot = await capturarSnapshot(interaction.guild);
-    const registro = db.salvarSnapshot(interaction.guildId, { ...snapshot, criadoPor: interaction.user.id });
-    await interaction.editReply({
-      components: [buildPainelContainer(interaction.guild,
-        `<:positivo:1528401238197276702> Snapshot criado! (\`${registro.totalCanais}\` canais, \`${registro.totalCargos}\` cargos, \`${registro.totalEmojis}\` emojis)`)],
-      flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-    });
+    const r = await salvarBackup(interaction.guild, interaction.user.id);
+    await interaction.editReply(buildHudPayload(interaction.guild,
+      `${E.ok} **Backup salvo!** \`${r.totalCargos}\` cargos • \`${r.totalCategorias}\` categorias • \`${r.totalCanais}\` canais`, { edicao: true }));
   } catch (e) {
-    console.error('[Backup] Erro ao criar snapshot:', e.message);
-    await interaction.editReply(errContainer(`<:negativo:1528400986744295475> Erro ao criar snapshot: ${e.message}`));
+    console.error('[HUD] Erro ao salvar backup:', e.message);
+    await interaction.editReply(errContainer(`${E.erro} Erro ao salvar o backup: ${e.message}`));
   }
 }
 
-async function abrirModalTemplate(interaction) {
-  const modal = new ModalBuilder().setCustomId('bkp_modal_input_template').setTitle('Salvar como Template');
-  modal.addComponents(
-    new ActionRowBuilder().addComponents(
-      new TextInputBuilder().setCustomId('nome').setLabel('Nome do template').setStyle(TextInputStyle.Short).setMaxLength(80).setRequired(true)
-    )
-  );
-  return interaction.showModal(modal);
-}
-
-async function salvarTemplateSubmit(interaction) {
-  const nome = interaction.fields.getTextInputValue('nome').trim().slice(0, 80);
-  if (!nome) return interaction.reply(errContainer('<:negativo:1528400986744295475> Nome inválido.'));
+async function alternarAutomatico(interaction) {
+  const atual = getAuto(interaction.guildId);
+  const novo = { enabled: !atual.enabled, intervaloHoras: atual.intervaloHoras || INTERVALO_AUTO_HORAS, ultimoEm: atual.ultimoEm || null };
+  db.updateGuild(interaction.guildId, 'backups.auto', novo);
   await interaction.deferUpdate();
-  try {
-    const snapshot = await capturarSnapshot(interaction.guild);
-    db.salvarTemplate(interaction.guildId, nome, { ...snapshot, criadoPor: interaction.user.id });
-    await interaction.editReply({
-      components: [buildPainelContainer(interaction.guild, `<:positivo:1528401238197276702> Template **"${nome}"** salvo com sucesso!`)],
-      flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-    });
-  } catch (e) {
-    console.error('[Backup] Erro ao salvar template:', e.message);
-    await interaction.editReply(errContainer(`<:negativo:1528400986744295475> Erro ao salvar template: ${e.message}`));
-  }
+  await interaction.editReply(buildHudPayload(interaction.guild,
+    novo.enabled
+      ? `${E.ok} **Backup automático ligado.** Vou salvar sozinho a cada ${novo.intervaloHoras}h (guardo os ${MAX_BACKUPS} mais recentes).`
+      : `${E.ok} **Backup automático desligado.**`, { edicao: true }));
 }
 
 async function listarSnapshots(interaction) {
   const itens = db.getSnapshots(interaction.guildId).slice().reverse();
-  return interaction.update({ components: [buildListaContainer(itens, 'snapshot')], flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2 });
-}
-
-async function listarTemplates(interaction) {
-  const itens = Object.values(db.getTemplates(interaction.guildId));
-  return interaction.update({ components: [buildListaContainer(itens, 'template')], flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2 });
+  return interaction.update({ components: [buildListaContainer(itens)], flags: FLAGS_V2 });
 }
 
 async function handleSelectMenu(interaction) {
-  const tipo = interaction.customId === 'bkp_sel_snapshot' ? 'snapshot' : 'template';
-  const valor = interaction.values[0];
-  const item = tipo === 'snapshot' ? db.getSnapshotPorId(interaction.guildId, valor) : db.getTemplatePorId(interaction.guildId, valor);
-  if (!item) return interaction.update(errContainer('<:negativo:1528400986744295475> Este item não existe mais.'));
-  return interaction.update({ components: [buildDetalheContainer(item, tipo)], flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2 });
+  const item = db.getSnapshotPorId(interaction.guildId, interaction.values[0]);
+  if (!item) return interaction.update(errContainer(`${E.erro} Este backup não existe mais.`));
+  return interaction.update({ components: [buildDetalheContainer(item)], flags: FLAGS_V2 });
+}
+
+function extrairId(customId, prefixo) {
+  // aceita também ids antigos de botões já publicados (…_snapshot_<id> / …_template_<id>)
+  const resto = customId.slice(prefixo.length);
+  const tipo = resto.startsWith('snapshot_') ? 'snapshot' : 'template';
+  return { tipo, id: resto.slice(tipo.length + 1) };
+}
+
+function buscarItem(guildId, tipo, id) {
+  return tipo === 'snapshot' ? db.getSnapshotPorId(guildId, id) : db.getTemplatePorId(guildId, id);
 }
 
 async function handleButton(interaction) {
   const customId = interaction.customId;
 
-  if (customId === 'bkp_painel_voltar') {
-    return interaction.update({ components: [buildPainelContainer(interaction.guild)], flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2 });
-  }
+  if (customId === 'bkp_painel_voltar') return interaction.update(buildHudPayload(interaction.guild, null, { edicao: true }));
   if (customId === 'bkp_criar_snapshot')    return criarSnapshotAgora(interaction);
-  if (customId === 'bkp_modal_template')    return abrirModalTemplate(interaction);
+  if (customId === 'bkp_toggle_auto')       return alternarAutomatico(interaction);
   if (customId === 'bkp_listar_snapshots')  return listarSnapshots(interaction);
-  if (customId === 'bkp_listar_templates')  return listarTemplates(interaction);
 
-  // bkp_confirmar_restaurar_<tipo>_<idOuNome> / bkp_executar_restaurar_<tipo>_<idOuNome> / bkp_apagar_<tipo>_<idOuNome>
   if (customId.startsWith('bkp_confirmar_restaurar_')) {
-    const resto = customId.replace('bkp_confirmar_restaurar_', '');
-    const tipo = resto.startsWith('snapshot_') ? 'snapshot' : 'template';
-    const idOuNome = resto.replace(`${tipo}_`, '');
-    const item = tipo === 'snapshot' ? db.getSnapshotPorId(interaction.guildId, idOuNome) : db.getTemplatePorId(interaction.guildId, idOuNome);
-    if (!item) return interaction.update(errContainer('<:negativo:1528400986744295475> Este item não existe mais.'));
-    return interaction.update({ components: [buildConfirmarContainer(item, tipo)], flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2 });
+    const { tipo, id } = extrairId(customId, 'bkp_confirmar_restaurar_');
+    const item = buscarItem(interaction.guildId, tipo, id);
+    if (!item) return interaction.update(errContainer(`${E.erro} Este backup não existe mais.`));
+    return interaction.update({ components: [buildConfirmarContainer(item)], flags: FLAGS_V2 });
   }
 
   if (customId.startsWith('bkp_executar_restaurar_')) {
-    const resto = customId.replace('bkp_executar_restaurar_', '');
-    const tipo = resto.startsWith('snapshot_') ? 'snapshot' : 'template';
-    const idOuNome = resto.replace(`${tipo}_`, '');
-    const item = tipo === 'snapshot' ? db.getSnapshotPorId(interaction.guildId, idOuNome) : db.getTemplatePorId(interaction.guildId, idOuNome);
-    if (!item) return interaction.update(errContainer('<:negativo:1528400986744295475> Este item não existe mais.'));
+    const { tipo, id } = extrairId(customId, 'bkp_executar_restaurar_');
+    const item = buscarItem(interaction.guildId, tipo, id);
+    if (!item) return interaction.update(errContainer(`${E.erro} Este backup não existe mais.`));
     await interaction.deferUpdate();
     try {
-      const resultado = await restaurarSnapshot(interaction.guild, item);
+      const r = await restaurarSnapshot(interaction.guild, item);
       const resumo =
-        `## <:positivo:1528401238197276702> Restauração concluída\n` +
-        `**Cargos criados:** \`${resultado.cargosCriados}\`\n` +
-        `**Categorias criadas:** \`${resultado.categoriasCriadas}\`\n` +
-        `**Canais criados:** \`${resultado.canaisCriados}\`\n` +
-        `**Emojis criados:** \`${resultado.emojisCriados}\`` +
-        (resultado.erros.length ? `\n\n⚠️ **${resultado.erros.length} erro(s):**\n\`\`\`\n${resultado.erros.slice(0, 8).join('\n')}\n\`\`\`` : '');
-      const container = new ContainerBuilder()
-        .setAccentColor(resultado.erros.length ? COR.DANGER : COR.SUCCESS)
-        .addTextDisplayComponents(new TextDisplayBuilder().setContent(resumo))
+        `## ${E.ok} Restauração concluída\n` +
+        `**Cargos criados:** \`${r.cargosCriados}\`\n**Categorias criadas:** \`${r.categoriasCriadas}\`\n` +
+        `**Canais criados:** \`${r.canaisCriados}\`\n**Emojis criados:** \`${r.emojisCriados}\`` +
+        (r.erros.length ? `\n\n⚠️ **${r.erros.length} erro(s):**\n\`\`\`\n${r.erros.slice(0, 8).join('\n')}\n\`\`\`` : '');
+      const c = new ContainerBuilder().setAccentColor(r.erros.length ? COR.DANGER : COR.SUCCESS)
+        .addTextDisplayComponents(txt(resumo))
         .addActionRowComponents(new ActionRowBuilder().addComponents(botaoVoltar()));
-      await interaction.editReply({ components: [container], flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2 });
+      await interaction.editReply({ components: [c], flags: FLAGS_V2 });
     } catch (e) {
-      console.error('[Backup] Erro ao restaurar:', e.message);
-      await interaction.editReply(errContainer(`<:negativo:1528400986744295475> Erro ao restaurar: ${e.message}`));
+      console.error('[HUD] Erro ao restaurar:', e.message);
+      await interaction.editReply(errContainer(`${E.erro} Erro ao restaurar: ${e.message}`));
     }
     return;
   }
 
   if (customId.startsWith('bkp_apagar_')) {
-    const resto = customId.replace('bkp_apagar_', '');
-    const tipo = resto.startsWith('snapshot_') ? 'snapshot' : 'template';
-    const idOuNome = resto.replace(`${tipo}_`, '');
-    if (tipo === 'snapshot') {
-      db.removerSnapshot(interaction.guildId, idOuNome);
-    } else {
-      // Templates são armazenados por NOME, mas o customId carrega o ID
-      // (curto, pra nunca estourar o limite de 100 caracteres do
-      // Discord) — busca o item pelo ID pra descobrir o nome real antes
-      // de remover.
-      const template = db.getTemplatePorId(interaction.guildId, idOuNome);
-      if (template) db.removerTemplate(interaction.guildId, template.nome);
-    }
-    return interaction.update({
-      components: [buildPainelContainer(interaction.guild, `<:apagar:1524206738885050388> ${tipo === 'snapshot' ? 'Snapshot' : 'Template'} removido.`)],
-      flags: MessageFlags.Ephemeral | MessageFlags.IsComponentsV2,
-    });
+    const { tipo, id } = extrairId(customId, 'bkp_apagar_');
+    if (tipo === 'snapshot') db.removerSnapshot(interaction.guildId, id);
+    else { const t = db.getTemplatePorId(interaction.guildId, id); if (t) db.removerTemplate(interaction.guildId, t.nome); }
+    return interaction.update(buildHudPayload(interaction.guild, `${E.apagar} Backup removido.`, { edicao: true }));
+  }
+
+  // Botões de painéis ANTIGOS ainda publicados: abre o HUD novo em vez de dar erro.
+  if (customId === 'bkp_modal_template' || customId === 'bkp_listar_templates') {
+    return interaction.update(buildHudPayload(interaction.guild, null, { edicao: true }));
   }
 }
 
 async function handleModal(interaction) {
-  if (interaction.customId === 'bkp_modal_input_template') return salvarTemplateSubmit(interaction);
+  // Modal de "salvar como template" foi removido do HUD novo.
+  return interaction.reply(errContainer(`${E.erro} Use o botão **Salvar agora** no /hud.`));
 }
 
 // ─────────────────────────────────────────────────────────────
-//  7. EXPORTS
+//  7. BACKUP AUTOMÁTICO
 // ─────────────────────────────────────────────────────────────
+let _timerAuto = null;
+
+async function rodarBackupsAutomaticos(client) {
+  for (const guild of client.guilds.cache.values()) {
+    try {
+      const auto = getAuto(guild.id);
+      if (!auto.enabled) continue;
+      const intervaloMs = (auto.intervaloHoras || INTERVALO_AUTO_HORAS) * 3600 * 1000;
+      if (auto.ultimoEm && Date.now() - new Date(auto.ultimoEm).getTime() < intervaloMs) continue;
+      await salvarBackup(guild, null);
+      db.updateGuild(guild.id, 'backups.auto', { ...auto, ultimoEm: new Date().toISOString() });
+      console.log(`[HUD] Backup automático salvo — guild ${guild.id}.`);
+    } catch (e) {
+      console.error(`[HUD] Falha no backup automático da guild ${guild.id}:`, e.message);
+    }
+  }
+}
+
+function iniciarBackupAutomatico(client) {
+  if (_timerAuto) return;
+  setTimeout(() => rodarBackupsAutomaticos(client), 60 * 1000);
+  _timerAuto = setInterval(() => rodarBackupsAutomaticos(client), 10 * 60 * 1000);
+  console.log('[HUD] Agendador de backup automático ativo (checa a cada 10 min).');
+}
+
 module.exports = {
   showAdminPanel,
   handleButton,
   handleSelectMenu,
   handleModal,
-  // Exportado para reuso futuro (ex.: gatilho automático de snapshot
-  // antes de ações de risco em outro sistema), sem duplicar a lógica.
+  iniciarBackupAutomatico,
   capturarSnapshot,
   restaurarSnapshot,
 };

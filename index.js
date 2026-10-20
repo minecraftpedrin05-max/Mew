@@ -36,6 +36,32 @@ iniciarMemoryWatchdog();
 // função async e usar `await` logo no início dela.
 // ─────────────────────────────────────────────────────────────────────
 const { restaurarBackupAntesDeIniciar, iniciarBackupPeriodico } = require('./database/backupSqlite');
+const emojiResolver = require('./utils/emojiResolver');
+
+// Registra os comandos de barra no Discord e DIZ no log exatamente o que aconteceu.
+// Se UM comando estiver inválido o Discord recusa o lote inteiro (e ficam só os
+// comandos antigos). Nesse caso registramos um por um pra isolar o culpado.
+async function sincronizarComandos(rest, commandsJSON) {
+  const nomes = commandsJSON.map(c => c.name);
+  console.log(`[Comandos] Carregados ${nomes.length}: ${nomes.join(', ')}`);
+  try {
+    const data = await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commandsJSON });
+    console.log(`[Comandos] ${data.length}/${nomes.length} registrados com sucesso no Discord.`);
+    return;
+  } catch (error) {
+    console.error('[Comandos] O Discord recusou o lote inteiro:', error?.rawError ? JSON.stringify(error.rawError.errors || error.rawError) : error);
+  }
+  let ok = 0;
+  for (const cmd of commandsJSON) {
+    try {
+      await rest.post(Routes.applicationCommands(CLIENT_ID), { body: cmd });
+      ok++;
+    } catch (e) {
+      console.error(`[Comandos] ❌ "/${cmd.name}" inválido e NÃO registrado:`, e?.rawError ? JSON.stringify(e.rawError.errors || e.rawError) : e.message);
+    }
+  }
+  console.log(`[Comandos] Registro individual: ${ok}/${commandsJSON.length} comandos registrados.`);
+}
 
 async function bootstrap() {
   await restaurarBackupAntesDeIniciar();
@@ -50,6 +76,8 @@ async function bootstrap() {
     GatewayIntentBits.GuildInvites,
   ]
 });
+
+emojiResolver.instalar(client); // conserta emojis personalizados quebrados (:coroa:)
 
 client.commands = new Collection();
 const commandsJSON = [];
@@ -89,25 +117,36 @@ const { iniciarProtectionScheduler } = ProtectionScheduler;
 
 client.once("ready", async () => {
   console.log("<:bot:1524207085850591273> Bot online: " + client.user.tag);
-  client.user.setPresence({ status: "online", activities: [{ name: "KRON PRO", type: 0 }] });
+  client.user.setPresence({ status: "online", activities: [{ name: "KAEL", type: 0 }] });
+
+  // Emojis do aplicativo: carrega antes de qualquer mensagem sair
+  await emojiResolver.carregar(client);
+  setTimeout(() => emojiResolver.relatorio(), 60 * 1000);
 
   try {
     const rest = new REST({ version: "10" }).setToken(TOKEN);
-    console.log(`<:xpooo:1523791736948920433> Atualizando ${commandsJSON.length} comandos de barra no Discord...`);
-    await rest.put(Routes.applicationCommands(CLIENT_ID), { body: commandsJSON });
-    console.log("<:positivo:1528401238197276702> Comandos sincronizados com sucesso!");
+    await sincronizarComandos(rest, commandsJSON);
   } catch (error) {
     console.error("Erro ao registrar os comandos na API:", error);
   }
 
+  // Servidor HTTP (webhooks de pagamento Mercado Pago/OpenPix + verificação web).
+  // Antes essa função existia mas nunca era chamada.
+  try { require('./sales-system/webhook').iniciarWebhook(client); }
+  catch (e) { console.error('[Webhook] Falha ao iniciar o servidor HTTP:', e.message); }
+
+  // Kael HUD — backup automático dos servidores que ligaram essa opção
+  try { require('./backup-system/backupManager').iniciarBackupAutomatico(client); }
+  catch (e) { console.error('[HUD] Falha ao iniciar o backup automático:', e.message); }
+
   // Inicia os sistemas automáticos (repostagem, limpeza, mensagens)
   iniciarScheduler(client);
 
-  // KRON INTELLIGENCE — recuperação automática de carrinhos abandonados
+  // KAEL INTELLIGENCE — recuperação automática de carrinhos abandonados
   iniciarCarrinhoScheduler(client);
   iniciarAlertScheduler(client);
 
-  // KRON PRO — expiração automática de carrinhos (10 minutos, fixo).
+  // KAEL — expiração automática de carrinhos (10 minutos, fixo).
   // Relê as transações pendentes do banco e recalcula o tempo restante de
   // cada uma — resistente a restart/deploy (não reinicia o cronômetro).
   iniciarExpiracaoScheduler(client);
@@ -127,25 +166,25 @@ client.once("ready", async () => {
   // Reagenda a liberação automática de quarentenas pendentes (resistente a restart)
   iniciarProtectionScheduler(client);
 
-  // KRON Templates — se o bot caiu no meio de uma aplicação de template,
+  // KAEL Templates — se o bot caiu no meio de uma aplicação de template,
   // recupera o estado (sem duplicar recursos) e libera o servidor (resistente a restart)
   try {
     const { recuperar } = require('./template-system/core/recovery');
     await recuperar(client);
   } catch (e) {
-    console.error('[KRON Templates] Falha ao rodar a recuperação de operações pendentes:', e);
+    console.error('[KAEL Templates] Falha ao rodar a recuperação de operações pendentes:', e);
   }
 
   // Backup automático pro Discord — só começa depois que o bot está
   // totalmente pronto, garantindo que já dá pra buscar o canal configurado.
   iniciarBackupPeriodico(client);
 
-  // KRON PRO — Sistema de Verificação: relocaliza os painéis publicados após restart
+  // KAEL — Sistema de Verificação: relocaliza os painéis publicados após restart
   // (não recria mensagens; painéis apagados ficam marcados como ausentes, sem perder dados).
   require('./verificacao-system/verificacaoManager').recuperarPaineis(client)
     .catch(e => console.error('[Verificacao] Erro na recuperação de painéis:', e));
 
-  // KRON INVITE SYSTEM - popula o cache de convites de cada guild uma
+  // KAEL INVITE SYSTEM - popula o cache de convites de cada guild uma
   // unica vez no boot, para nunca precisar re-buscar todos os convites
   // a cada entrada de membro.
   require('./invite-system/inviteTracker').primeAllGuilds(client)
@@ -214,7 +253,7 @@ client.on("guildMemberAdd", async (member) => {
   try {
     await require('./invite-system/inviteTracker').handleGuildMemberAdd(member);
   } catch (e) {
-    console.error("Erro no KRON Invite System (guildMemberAdd):", e);
+    console.error("Erro no KAEL Invite System (guildMemberAdd):", e);
   }
   try {
     await require('./commands/boasVindas').handleGuildMemberAdd(member);
@@ -232,7 +271,7 @@ client.on("guildMemberRemove", async (member) => {
   try {
     await require('./invite-system/inviteTracker').handleGuildMemberRemove(member);
   } catch (e) {
-    console.error("Erro no KRON Invite System (guildMemberRemove):", e);
+    console.error("Erro no KAEL Invite System (guildMemberRemove):", e);
   }
 });
 
@@ -240,7 +279,7 @@ client.on("inviteCreate", (invite) => {
   try {
     require('./invite-system/inviteTracker').handleInviteCreate(invite);
   } catch (e) {
-    console.error("Erro no KRON Invite System (inviteCreate):", e);
+    console.error("Erro no KAEL Invite System (inviteCreate):", e);
   }
 });
 
@@ -248,7 +287,7 @@ client.on("inviteDelete", (invite) => {
   try {
     require('./invite-system/inviteTracker').handleInviteDelete(invite);
   } catch (e) {
-    console.error("Erro no KRON Invite System (inviteDelete):", e);
+    console.error("Erro no KAEL Invite System (inviteDelete):", e);
   }
 });
 
@@ -256,7 +295,7 @@ client.on("guildCreate", async (guild) => {
   try {
     await require('./invite-system/inviteTracker').primeGuildCache(guild);
   } catch (e) {
-    console.error("Erro no KRON Invite System (guildCreate):", e);
+    console.error("Erro no KAEL Invite System (guildCreate):", e);
   }
 });
 

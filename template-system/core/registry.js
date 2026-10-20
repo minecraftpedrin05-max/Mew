@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/registry.js — KRON SERVER TEMPLATES
+//  template-system/core/registry.js — KAEL SERVER TEMPLATES
 //
 //  Biblioteca em memória. Descobre sozinha:
 //    • templates oficiais  → todo .js dentro de template-system/library/ (recursivo);

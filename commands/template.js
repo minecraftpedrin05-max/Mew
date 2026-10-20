@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  commands/template.js — KRON SERVER TEMPLATES
+//  commands/template.js — KAEL SERVER TEMPLATES
 //
 //  Comando único: /template
 //    biblioteca → categoria → template → preview (cargos/categorias/canais/permissões)
@@ -47,7 +47,7 @@ function tituloBase(base, f) {
   if (base.especial === 'destaque') return 'Em destaque';
   if (base.especial === 'novos') return 'Novos templates';
   if (base.especial === 'favoritos') return 'Meus favoritos';
-  if (base.origem === 'oficial') return 'KRON Official';
+  if (base.origem === 'oficial') return 'KAEL Official';
   if (base.origem === 'comunidade') return 'Templates da comunidade';
   const s = f.secao || base.secao;
   if (s && schema.SECOES[s]) return schema.SECOES[s].nome;
@@ -68,8 +68,8 @@ function resumoFiltros(f) {
 module.exports = {
   data: new SlashCommandBuilder()
     .setName('template')
-    .setDescription('KRON Templates — biblioteca de estruturas prontas de servidor Discord')
-    .addAttachmentOption(o => o.setName('arquivo').setDescription('(Opcional) Envie um template em JSON para análise da equipe KRON').setRequired(false))
+    .setDescription('KAEL Templates — biblioteca de estruturas prontas de servidor Discord')
+    .addAttachmentOption(o => o.setName('arquivo').setDescription('(Opcional) Envie um template em JSON para análise da equipe KAEL').setRequired(false))
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction, client) {
@@ -77,7 +77,7 @@ module.exports = {
       return interaction.reply({ content: 'Use este comando dentro de um servidor.', flags: eph });
     }
     if (!interaction.memberPermissions || !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) {
-      return interaction.reply({ content: 'Apenas administradores do servidor podem usar o KRON Templates.', flags: eph });
+      return interaction.reply({ content: 'Apenas administradores do servidor podem usar o KAEL Templates.', flags: eph });
     }
     try {
       const helpers = require('../utils/helpers');
@@ -85,7 +85,7 @@ module.exports = {
         return interaction.reply({ content: 'Este servidor não possui uma licença ativa.', flags: eph });
       }
       if (PLANO_MINIMO && helpers.temPlanoMinimo && !helpers.temPlanoMinimo(interaction.guild.id, PLANO_MINIMO)) {
-        return interaction.reply({ content: `Adquira o plano ${PLANO_MINIMO} para usar o KRON Templates.`, flags: eph });
+        return interaction.reply({ content: `Adquira o plano ${PLANO_MINIMO} para usar o KAEL Templates.`, flags: eph });
       }
     } catch { /* helpers indisponível: segue sem gate */ }
 
@@ -105,7 +105,7 @@ module.exports = {
       if (!env.ok) return interaction.editReply({ components: ui.simples('Não foi possível enviar', env.erro, ui.COR.erro), flags: MessageFlags.IsComponentsV2 | eph });
       const c = schema.contar(r.template);
       return interaction.editReply({
-        components: ui.simples('Template enviado para análise', `**${ui.cortar(r.template.nome, 50)}** entrou na fila de revisão da equipe KRON.\n\n${c.cargos} cargos • ${c.categorias} categorias • ${c.canais} canais\n\nNada é publicado automaticamente. Você será avisado por DM quando houver uma decisão.`, ui.COR.ok),
+        components: ui.simples('Template enviado para análise', `**${ui.cortar(r.template.nome, 50)}** entrou na fila de revisão da equipe KAEL.\n\n${c.cargos} cargos • ${c.categorias} categorias • ${c.canais} canais\n\nNada é publicado automaticamente. Você será avisado por DM quando houver uma decisão.`, ui.COR.ok),
         flags: MessageFlags.IsComponentsV2 | eph,
       });
     }
@@ -122,7 +122,7 @@ module.exports = {
     let ocupado = false;
     let parar = false;
 
-    const render = (comps) => ultima.editReply({ components: comps }).catch(e => console.error('[KRON Templates] Falha ao atualizar painel:', e.message));
+    const render = (comps) => ultima.editReply({ components: comps }).catch(e => console.error('[KAEL Templates] Falha ao atualizar painel:', e.message));
 
     // ── telas ──
     const montarHome = () => {
@@ -226,7 +226,7 @@ module.exports = {
           },
         });
       } catch (e) {
-        console.error('[KRON Templates] Erro inesperado na aplicação:', e);
+        console.error('[KAEL Templates] Erro inesperado na aplicação:', e);
         res = { criados: { cargos: [], categorias: [], canais: [] }, erros: [`Erro inesperado: ${String(e.message).slice(0, 120)}`], parou: false, abortou: 'Erro inesperado durante a aplicação.' };
       } finally {
         lock.destravar(guild.id);
@@ -266,7 +266,7 @@ module.exports = {
           onProgress: (p) => { if (Date.now() - ultimoEdit < 1500 && p.pct < 100) return; ultimoEdit = Date.now(); render(ui.desfazerProgresso(p)); },
         });
       } catch (err) {
-        console.error('[KRON Templates] Erro no rollback:', err);
+        console.error('[KAEL Templates] Erro no rollback:', err);
         out = { removidos: { canais: 0, categorias: 0, cargos: 0 }, jaNaoExistiam: 0, preservados: [], erros: [`Erro inesperado: ${String(err.message).slice(0, 120)}`] };
       } finally { lock.destravar(guild.id); ocupado = false; }
       store.atualizarHistorico(guild.id, id, { desfeito: new Date().toISOString(), resultado: e.resultado, rollback: { removidos: out.removidos, erros: out.erros.slice(0, 5) } });
@@ -274,7 +274,7 @@ module.exports = {
       return render(ui.desfazerResultado({ e, out }));
     }
 
-    // ── revisão (equipe KRON) ──
+    // ── revisão (equipe KAEL) ──
     async function notificar(userId, texto) {
       try { const u = await (client || interaction.client).users.fetch(userId); await u.send(texto); } catch { /* DM fechada */ }
     }
@@ -287,7 +287,7 @@ module.exports = {
       const r = store.aprovarEnvio(env.id, user.id, slug.slice(0, 60));
       if (!r.ok) return render(ui.simples('Revisão', r.erro, ui.COR.erro, [ui.btn('tpl_revisao', '◀ Fila')]));
       registry.recarregar();
-      await notificar(env.userId, `Seu template **${env.nome}** foi aprovado e já está na biblioteca do KRON Templates.`);
+      await notificar(env.userId, `Seu template **${env.nome}** foi aprovado e já está na biblioteca do KAEL Templates.`);
       S.envioId = null;
       return render(ui.simples('Revisão', `**${ui.cortar(env.nome, 50)}** aprovado e publicado como \`${slug}\`.`, ui.COR.ok, [ui.btn('tpl_revisao', '◀ Fila'), ui.btn('tpl_home', '🏠')]));
     }
@@ -322,7 +322,7 @@ module.exports = {
           return mostrarFiltros();
         }
         if (id === 'tpl_rev_recusar') {
-          if (!ehRevisor) return i.reply({ content: 'Apenas a equipe KRON pode revisar.', flags: eph });
+          if (!ehRevisor) return i.reply({ content: 'Apenas a equipe KAEL pode revisar.', flags: eph });
           const r = await pedir(i, 'Recusar template', [{ id: 'motivo', label: 'Motivo (enviado ao autor)', longo: true, obrigatorio: true, max: 300 }]);
           if (!r) return;
           const env = store.getEnvio(S.envioId);
@@ -404,7 +404,7 @@ module.exports = {
         }
       } catch (err) {
         ocupado = false;
-        console.error('[KRON Templates] Erro no painel:', err);
+        console.error('[KAEL Templates] Erro no painel:', err);
         if (!i.replied && !i.deferred) await i.reply({ content: 'Erro ao processar essa ação. Tente novamente.', flags: eph }).catch(() => {});
       }
     });

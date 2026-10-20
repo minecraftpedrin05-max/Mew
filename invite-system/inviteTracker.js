@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/inviteTracker.js
 //
-// KRON INVITE SYSTEM — rastreamento real (Parte 1).
+// KAEL INVITE SYSTEM — rastreamento real (Parte 1).
 //
 // Mantém um cache em memória (Map<guildId, Map<code, uses>>) dos convites
 // de cada servidor, populado uma única vez por servidor (guildCreate /

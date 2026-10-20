@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /sugestao
+ *  KAEL — /sugestao
  *  Abre o formulário de nova sugestão (título, descrição, imagem
  *  opcional). Depois do envio, o próprio módulo pergunta em qual
  *  canal publicar. Lógica real em sugestoes-system/sugestoesManager.js.

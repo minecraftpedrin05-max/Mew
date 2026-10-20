@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/schema.js — KRON SERVER TEMPLATES
+//  template-system/core/schema.js — KAEL SERVER TEMPLATES
 //
 //  Formato CANÔNICO de um template + contagem, validação e sanitização.
 //  Tudo que entra na biblioteca (templates oficiais escritos com o DSL e

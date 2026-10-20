@@ -3,8 +3,8 @@ const backupManager = require('../backup-system/backupManager');
 
 module.exports = {
   data: new SlashCommandBuilder()
-    .setName('backup')
-    .setDescription('Backup e restauração completa do servidor (canais, cargos, permissões, emojis)')
+    .setName('hud')
+    .setDescription('Kael HUD — salva e restaura cargos, categorias, canais e permissões do servidor')
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   async execute(interaction) {

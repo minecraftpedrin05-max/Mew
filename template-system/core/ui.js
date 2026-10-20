@@ -1,9 +1,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/ui.js — KRON SERVER TEMPLATES
+//  template-system/core/ui.js — KAEL SERVER TEMPLATES
 //
 //  Todas as telas do /template. Funções PURAS: recebem dados, devolvem a lista de
 //  componentes (Components V2). Quem decide o que mostrar e reage aos cliques é o
-//  commands/template.js. Identidade KRON: minimalista, uma cor de destaque,
+//  commands/template.js. Identidade KAEL: minimalista, uma cor de destaque,
 //  sem excesso de emojis coloridos.
 // ═══════════════════════════════════════════════════════════════════════════
 'use strict';
@@ -52,10 +52,10 @@ function pagina(cor, corpo, linhas, imagemUrl) {
   return [c, ...(linhas || [])];
 }
 
-const cab = (extra) => `# KRON TEMPLATES\n-# ${extra}`;
+const cab = (extra) => `# KAEL TEMPLATES\n-# ${extra}`;
 
 function badge(t) {
-  if (t.oficial) return 'KRON Official';
+  if (t.oficial) return 'KAEL Official';
   return t.origem && t.origem.tipo === 'externa' ? 'Externo' : 'Comunidade';
 }
 
@@ -74,9 +74,9 @@ function home({ total, contagemSecoes, destaque, novos, revisor, pendentes, erro
   if (erros && erros.length) corpo += `\n\n-# ${erros.length} template(s) foram ignorados por erro de validação.`;
 
   const opcoes = [
-    { label: 'Em destaque', value: 'esp:destaque', description: 'Selecionados pela KRON e mais utilizados' },
+    { label: 'Em destaque', value: 'esp:destaque', description: 'Selecionados pela KAEL e mais utilizados' },
     { label: 'Novos templates', value: 'esp:novos', description: 'Adicionados recentemente' },
-    { label: 'KRON Official', value: 'ori:oficial', description: 'Feitos pela equipe KRON Apps' },
+    { label: 'KAEL Official', value: 'ori:oficial', description: 'Feitos pela equipe KAEL Apps' },
     { label: 'Templates da comunidade', value: 'ori:comunidade', description: 'Enviados e aprovados pela comunidade' },
     { label: 'Meus favoritos', value: 'esp:favoritos', description: 'Templates que você marcou' },
     ...Object.entries(schema.SECOES).map(([k, s]) => ({ label: s.nome, value: 'sec:' + k, description: `${contagemSecoes[k] || 0} template(s)` })),
@@ -129,7 +129,7 @@ function lista({ titulo, filtroTxt, itens, pagina: pg, total, vazioMsg }) {
 // ═══════════════════════════════════════════════════════════════════════════
 function filtros({ f, estilos }) {
   const marca = (v, atual) => v === (atual || '');
-  const orig = [['', 'Todas as origens'], ['oficial', 'KRON Official'], ['comunidade', 'Comunidade'], ['premium', 'Premium']];
+  const orig = [['', 'Todas as origens'], ['oficial', 'KAEL Official'], ['comunidade', 'Comunidade'], ['premium', 'Premium']];
   const ord = [['', 'Padrão'], ['recentes', 'Mais recentes'], ['usados', 'Mais utilizados'], ['az', 'Nome (A-Z)'], ['canais', 'Mais canais'], ['cargos', 'Mais cargos']];
   const corpo = `${cab('Filtros da biblioteca')}\n\n` +
     `**Categoria:** ${f.secao ? (schema.SECOES[f.secao] || {}).nome : 'todas'}\n` +
@@ -277,7 +277,7 @@ function barra(pct) {
 
 function progresso({ nome, estado }) {
   const e = estado;
-  const corpo = `# KRON TEMPLATES\n**Aplicando template...**\n\`${barra(e.pct)} ${e.pct}%\`\n\n` +
+  const corpo = `# KAEL TEMPLATES\n**Aplicando template...**\n\`${barra(e.pct)} ${e.pct}%\`\n\n` +
     `Cargos: ${e.feitos.cargos}/${e.totais.cargos}\nCategorias: ${e.feitos.categorias}/${e.totais.categorias}\nCanais: ${e.feitos.canais}/${e.totais.canais}\n\n` +
     `**Status:** ${e.estagio}${e.erros ? `\n-# ${e.erros} erro(s) até agora` : ''}\n-# Template: ${cortar(nome, 50)}`;
   return pagina(COR.aviso, corpo, [linha(btn('tpl_parar', 'Parar', ButtonStyle.Danger))]);
@@ -355,7 +355,7 @@ function desfazerConfirmar({ e }) {
 }
 
 function desfazerProgresso({ pct, msg }) {
-  return pagina(COR.aviso, `# KRON TEMPLATES\n**Desfazendo aplicação...**\n\`${barra(pct)} ${pct}%\`\n\n**Status:** ${msg}`, []);
+  return pagina(COR.aviso, `# KAEL TEMPLATES\n**Desfazendo aplicação...**\n\`${barra(pct)} ${pct}%\`\n\n**Status:** ${msg}`, []);
 }
 
 function desfazerResultado({ e, out }) {
@@ -374,7 +374,7 @@ function desfazerResultado({ e, out }) {
 function enviar({ meusEnvios, maxPend }) {
   const ROTULO_STATUS = { pendente: 'Pendente', aprovado: 'Aprovado', recusado: 'Recusado' };
   let corpo = `${cab('Enviar template para a biblioteca da comunidade')}\n\n` +
-    '**Como funciona**\n1. Você envia um template em JSON.\n2. Ele entra em análise.\n3. A equipe KRON revisa.\n4. É aprovado ou recusado.\n5. Se aprovado, entra na biblioteca.\n\n' +
+    '**Como funciona**\n1. Você envia um template em JSON.\n2. Ele entra em análise.\n3. A equipe KAEL revisa.\n4. É aprovado ou recusado.\n5. Se aprovado, entra na biblioteca.\n\n' +
     '**Nunca publicamos automaticamente.** Só enviamos templates que você criou ou que tenham licença que permita a redistribuição — sem servidores privados, backups de terceiros ou conteúdo vazado.\n\n' +
     '**Para enviar:** use `/template` anexando o arquivo JSON na opção **arquivo**.\n' +
     'Não tem o JSON? Toque em **Exportar este servidor** para gerar a estrutura (cargos, categorias, canais e permissões) do SEU servidor.\n' +
@@ -384,7 +384,7 @@ function enviar({ meusEnvios, maxPend }) {
 }
 
 function revisaoLista({ envios }) {
-  let corpo = `${cab('Revisão de templates da comunidade (equipe KRON)')}\n\n`;
+  let corpo = `${cab('Revisão de templates da comunidade (equipe KAEL)')}\n\n`;
   if (!envios.length) corpo += '_Nenhum envio pendente._';
   else corpo += envios.slice(0, 10).map(e => `**${cortar(e.nome, 40)}** — por <@${e.userId}> • <t:${Math.floor(Date.parse(e.criadoEm) / 1000)}:R>${e.avisos && e.avisos.length ? ` • ${e.avisos.length} aviso(s)` : ''}`).join('\n');
   const rows = [];

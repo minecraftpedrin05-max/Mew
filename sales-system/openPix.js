@@ -112,7 +112,7 @@ async function criarSubconta({ appId, sandbox, pixKey, name }) {
   if (!pixKey) throw new Error('Chave PIX obrigatória para criar a subconta.');
   const dados = await requestJson({
     appId, sandbox, method: 'POST', path: '/api/v1/subaccount',
-    body: { pixKey, name: (name || 'Loja KRON').slice(0, 100) },
+    body: { pixKey, name: (name || 'Loja KAEL').slice(0, 100) },
   });
   return dados?.subAccount || dados?.SubAccount || dados;
 }
@@ -153,7 +153,7 @@ async function sacarSubconta({ appId, sandbox, pixKey }) {
  * Cria uma cobrança PIX vinculada à subconta do servidor (campo
  * `subaccount`, documentado como "Pix key of the subaccount to receive
  * the charge" — o valor integral vai para a subconta, sem split/comissão
- * da conta principal KRON; ver PENDÊNCIA no relatório se split for desejado).
+ * da conta principal KAEL; ver PENDÊNCIA no relatório se split for desejado).
  * @returns {Promise<{id: string, status: string, copiaECola: string, qrCodeBase64: string|null}>}
  */
 async function criarPagamentoPix({ appId, sandbox, subaccountPixKey, valor, descricao, clienteId, guildId }) {
@@ -165,7 +165,7 @@ async function criarPagamentoPix({ appId, sandbox, subaccountPixKey, valor, desc
 
   // correlationID: identificador único da cobrança (idempotência —
   // TAREFA 8). Reenviar o mesmo correlationID nunca cria cobrança duplicada.
-  const correlationID = `kron-${guildId}-${clienteId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+  const correlationID = `kael-${guildId}-${clienteId}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   const dados = await requestJson({
     appId, sandbox, method: 'POST', path: '/api/v1/charge',
@@ -201,7 +201,7 @@ async function consultarPagamento(correlationID, cfg) {
   return { id: correlationID, status: mapStatus(charge?.status), status_detail: charge?.status };
 }
 
-/** Vocabulário OpenPix (ACTIVE/COMPLETED/EXPIRED) → vocabulário interno do KRON. */
+/** Vocabulário OpenPix (ACTIVE/COMPLETED/EXPIRED) → vocabulário interno do KAEL. */
 function mapStatus(status) {
   const mapa = {
     COMPLETED: 'approved',

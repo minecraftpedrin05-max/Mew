@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /ping
+ *  KAEL — /ping
  *  Mostra a latência do bot: WebSocket (heartbeat com o Discord) e
  *  latência de resposta real (round-trip da própria interação).
  * ─────────────────────────────────────────────────────────────────

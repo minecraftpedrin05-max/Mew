@@ -15,8 +15,10 @@ const {
   MessageFlags,
 } = require('discord.js');
 
-const LOGO       = '<:coroa:1520751629350080582> KRON PRO';
-const BANNER_URL = 'https://i.imgur.com/ZOo3Rt1.png';
+const { bannerFile, BANNER_ATTACH_URL } = require('../utils/branding');
+
+const LOGO       = '<:coroa:1520751629350080582> KAEL';
+const BANNER_URL = BANNER_ATTACH_URL; // banner KAEL enviado como anexo
 
 function getSaudacao() {
   const h = new Date().getHours();
@@ -78,6 +80,7 @@ function buildPainelContainer(user) {
 function painelPayload(user) {
   return {
     components: [ buildPainelContainer(user) ],
+    files: [ bannerFile() ],
     flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
   };
 }
@@ -97,6 +100,8 @@ function painelUpdatePayload(user) {
     content: null,
     embeds: [],
     components: [ buildPainelContainer(user) ],
+    files: [ bannerFile() ],
+    attachments: [],
     flags: MessageFlags.IsComponentsV2 | MessageFlags.Ephemeral,
   };
 }

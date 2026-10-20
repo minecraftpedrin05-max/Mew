@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Definições
+ *  KAEL — Definições
  *  Reescrita fiel do Definicoes.py (NX7 VENDAS / Ease Pro)
  *
  *  Acionado por: botão 'painel_definicoes' no /painel
@@ -741,7 +741,7 @@ async function handleButton(interaction) {
         name: cfg.nome,
         color: cfg.cor,
         hoist: true,
-        reason: `[KRON] Configurar cargo: ${cfg.nome}`,
+        reason: `[KAEL] Configurar cargo: ${cfg.nome}`,
       });
       const def = getDef(interaction.guildId);
       if (!def.cargos) def.cargos = {};

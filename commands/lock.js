@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /lock
+ *  KAEL — /lock
  *  Bloqueia o canal atual para um cargo específico (remove a
  *  permissão de enviar mensagens desse cargo neste canal).
  *  Segue o mesmo padrão visual dos outros comandos administrativos

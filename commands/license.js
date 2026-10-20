@@ -45,7 +45,7 @@ function buildPainelEmbed() {
   const s = licenseDb.getKeyStats();
   return new EmbedBuilder()
     .setColor(CORES.INFO)
-    .setTitle("🔐 Painel de Licenças — KRON PRO")
+    .setTitle("🔐 Painel de Licenças — KAEL")
     .addFields(
       { name: "Total de licenças", value: `\`${s.total}\``, inline: true },
       { name: `${STATUS_META.nao_utilizada.emoji} Não utilizadas`, value: `\`${s.naoUtilizadas}\``, inline: true },

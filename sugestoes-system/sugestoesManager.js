@@ -1,6 +1,6 @@
 'use strict';
 /**
- * KRON PRO — Sistema de Sugestões
+ * KAEL — Sistema de Sugestões
  * Envio: /sugestao (modal → escolher canal → publica embed + abre Tópico).
  * Administração: /painel → 💡 Sugestões (Histórico + Configuração).
  * Dados: db.getGuild(guildId).sugestoes (SQLite, isolado por guild).
@@ -253,7 +253,7 @@ const txt = (c) => new TextDisplayBuilder().setContent(String(c).slice(0, 3800))
 const btn = (id, label, style = ButtonStyle.Secondary, disabled = false) => new ButtonBuilder().setCustomId(id).setLabel(label).setStyle(style).setDisabled(disabled);
 const row = (...c) => new ActionRowBuilder().addComponents(...c);
 function container(header, notice) {
-  const c = new ContainerBuilder().setAccentColor(0x000000).addTextDisplayComponents(txt(`# KRON PRO — Sistema de Sugestões\n-# ${header}`));
+  const c = new ContainerBuilder().setAccentColor(0x000000).addTextDisplayComponents(txt(`# KAEL — Sistema de Sugestões\n-# ${header}`));
   if (notice) c.addTextDisplayComponents(txt(`> ⚠️ ${notice}`));
   return c.addSeparatorComponents(sep());
 }

@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — sales-system/avisoEstoque.js
+ *  KAEL — sales-system/avisoEstoque.js
  *  Lista de clientes que pediram pra ser avisados quando um produto
  *  específico for reabastecido, e o disparo desse aviso por DM.
  * ─────────────────────────────────────────────────────────────────

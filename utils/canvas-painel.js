@@ -101,7 +101,7 @@ async function gerarPainelCanvas(dados) {
   ctx.textAlign = "center";
   ctx.fillStyle = OURO;
   ctx.font = "bold 54px sans-serif";
-  ctx.fillText("KRON PRO", W / 2, bannerH - 75);
+  ctx.fillText("KAEL", W / 2, bannerH - 75);
 
   ctx.fillStyle = CINZA_CLARO;
   ctx.font = "20px sans-serif";
@@ -175,7 +175,7 @@ async function gerarPainelCanvas(dados) {
   ctx.fillText("Agora", 380, y);
 
   // ════════════════════════════════════════
-  // FAIXA FINAL "KRON SYSTEM" - fundo branco
+  // FAIXA FINAL "KAEL SYSTEM" - fundo branco
   // ════════════════════════════════════════
   const barH = 50;
   const barY = H - barH;
@@ -187,7 +187,7 @@ async function gerarPainelCanvas(dados) {
   ctx.font = "bold 22px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(">>  KRON SYSTEM  <<", W / 2, barY + barH / 2);
+  ctx.fillText(">>  KAEL SYSTEM  <<", W / 2, barY + barH / 2);
   ctx.textAlign = "left";
   ctx.textBaseline = "alphabetic";
 
@@ -197,7 +197,7 @@ async function gerarPainelCanvas(dados) {
 const FAIXA_BG_URL = "https://i.imgur.com/R8JiuAK.png";
 
 /**
- * Gera a segunda imagem (faixa branca separada) com "KRON SYSTEM".
+ * Gera a segunda imagem (faixa branca separada) com "KAEL SYSTEM".
  * @returns {Promise<Buffer>} PNG buffer
  */
 async function gerarFaixaKron() {
@@ -219,7 +219,7 @@ async function gerarFaixaKron() {
   ctx.font = "bold 24px sans-serif";
   ctx.textAlign = "center";
   ctx.textBaseline = "middle";
-  ctx.fillText(">>  KRON SYSTEM  <<", W / 2, H / 2);
+  ctx.fillText(">>  KAEL SYSTEM  <<", W / 2, H / 2);
 
   return canvas.toBuffer("image/png");
 }

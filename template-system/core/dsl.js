@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/dsl.js — KRON SERVER TEMPLATES
+//  template-system/core/dsl.js — KAEL SERVER TEMPLATES
 //
 //  DSL compacta para escrever templates oficiais. Um arquivo em library/ exporta
 //  uma LISTA de definições; cada uma vira um template canônico (schema.js).
@@ -101,8 +101,8 @@ function tpl(def) {
     secao: def.cat,
     estilo: def.estilo || 'clean',
     tags: def.tags || [],
-    autor: def.autor || 'KRON Apps',
-    origem: { tipo: 'kron', licenca: 'KRON Apps — template oficial', url: null },
+    autor: def.autor || 'KAEL Apps',
+    origem: { tipo: 'kron', licenca: 'KAEL Apps — template oficial', url: null },
     versao: def.ver || '1.0.0',
     criadoEm: data,
     atualizadoEm: def.atualizado || data,

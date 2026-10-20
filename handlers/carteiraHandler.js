@@ -1,7 +1,7 @@
 // ============================================================
 //  handlers/carteiraHandler.js — Handler de interações da carteira
 //  Migrado da source antiga (commands/carteira.js + handlers/
-//  carteiraHandler.js) e adaptado à arquitetura atual do KRON PRO:
+//  carteiraHandler.js) e adaptado à arquitetura atual do KAEL:
 //    • Mesmo banco (database/carteiraDB.js) — sem duplicar dados.
 //    • Roteado pelo events/buttonHandler.js (padrão de prefixo por
 //      customId já usado por todo o projeto, ex.: c6-system,
@@ -320,7 +320,7 @@ async function handleConfigurarPix(interaction) {
     .setTitle('🔑 Configuração PIX')
     .setDescription(
       cfgOpenPix.habilitado
-        ? 'Este servidor já está vinculado à OpenPix.\n\n⚠️ A documentação oficial não expõe um endpoint para alterar a chave PIX de uma subconta já criada — por isso, a partir daqui, só é possível **atualizar o PIX exibido localmente** (não altera a subconta OpenPix). Fale com o suporte da KRON para trocar a chave vinculada à OpenPix.'
+        ? 'Este servidor já está vinculado à OpenPix.\n\n⚠️ A documentação oficial não expõe um endpoint para alterar a chave PIX de uma subconta já criada — por isso, a partir daqui, só é possível **atualizar o PIX exibido localmente** (não altera a subconta OpenPix). Fale com o suporte da KAEL para trocar a chave vinculada à OpenPix.'
         : 'Selecione o tipo da chave PIX:'
     )
     .addFields(

@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON — Scheduler de Sorteios
+ *  KAEL — Scheduler de Sorteios
  *
  *  Responsável por encerrar sorteios automaticamente quando o tempo
  *  configurado termina. Segue o MESMO padrão de handlers/scheduler.js

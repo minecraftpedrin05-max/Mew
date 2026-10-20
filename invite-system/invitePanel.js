@@ -1,7 +1,7 @@
 // ═══════════════════════════════════════════════════════════════════════
 // invite-system/invitePanel.js
 //
-// KRON INVITE SYSTEM — Parte 2: fonte única de verdade do painel público
+// KAEL INVITE SYSTEM — Parte 2: fonte única de verdade do painel público
 // (embed + botões, já respeitando personalização) e do deploy/atualização
 // automática (guarda channelId/messageId e edita a mensagem existente em
 // vez de criar uma nova toda vez que a config muda).

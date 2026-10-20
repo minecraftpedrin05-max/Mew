@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────────
- *  KRON PRO — Expiração automática de carrinhos (10 minutos, FIXO)
+ *  KAEL — Expiração automática de carrinhos (10 minutos, FIXO)
  *
  *  Quando um carrinho chega na etapa de QR Code/Pagamento Pendente,
  *  sales-system/transacaoManager.js grava uma transação PENDING com

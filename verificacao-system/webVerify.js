@@ -1,12 +1,12 @@
 'use strict';
 /**
- * KRON PRO — Verificação Web
+ * KAEL — Verificação Web
  *
- * Fluxo (site padrão KRON):
+ * Fluxo (site padrão KAEL):
  *   1) Usuário clica no botão do painel público (Discord) → cria sessão (PENDING),
  *      já sabendo guildId + userId (vieram da própria interação do Discord).
  *   2) Bot responde (efêmero) com um link único para /verify/<sessionId>.
- *   3) A página KRON mostra um botão "Verificar" que É o próprio link de
+ *   3) A página KAEL mostra um botão "Verificar" que É o próprio link de
  *      autorização OAuth2 do Discord (authorize), com state=<sessionId>.
  *   4) Discord redireciona para /verify/callback?code=...&state=<sessionId>.
  *   5) Backend troca o code por um access_token (OAuth2 oficial, scope
@@ -21,7 +21,7 @@
  *   O admin configura uma URL própria. O bot ainda cria a sessão da mesma
  *   forma e manda o usuário pra lá com ?session=<id>. Não existe um padrão
  *   oficial do Discord para "federar" verificação entre dois backends
- *   diferentes — isso é um contrato próprio do KRON: o site do servidor,
+ *   diferentes — isso é um contrato próprio do KAEL: o site do servidor,
  *   depois de identificar o usuário do jeito que quiser, chama de volta
  *   POST /verify/api/complete com { session, secret }. O "secret" é gerado
  *   uma única vez por servidor (mostrado uma vez só no /painel) e funciona
@@ -168,7 +168,7 @@ async function concederCargo(client, session) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════
-// HTML — site padrão KRON (auto-contido, sem dependências externas)
+// HTML — site padrão KAEL (auto-contido, sem dependências externas)
 // ═══════════════════════════════════════════════════════════════════════
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
 
@@ -207,7 +207,7 @@ function paginaVerificar(session, guildInfo) {
   return baseHtml({
     titulo: 'Verificação necessária',
     corpo: `
-      <div class="logo">KRON PRO</div>
+      <div class="logo">KAEL</div>
       ${icone ? `<img class="icon-guild" src="${esc(icone)}" alt="">` : ''}
       <h1>🛡️ Verificação necessária</h1>
       <p class="desc">Verifique sua conta para acessar <strong>${esc(nome)}</strong> e liberar os canais.</p>
@@ -223,7 +223,7 @@ function paginaSucesso(guildId, res) {
   return baseHtml({
     titulo: 'Verificação concluída',
     corpo: `
-      <div class="logo">KRON PRO</div>
+      <div class="logo">KAEL</div>
       ${ICON_OK}
       <h1>Verificação concluída</h1>
       <p class="desc">${res.jaVerificado ? 'Sua conta já estava verificada.' : 'Sua conta foi verificada com sucesso.'}<br>Seu acesso foi liberado.</p>
@@ -236,7 +236,7 @@ function paginaErro(titulo, mensagem) {
   return baseHtml({
     titulo,
     corpo: `
-      <div class="logo">KRON PRO</div>
+      <div class="logo">KAEL</div>
       ${ICON_ERR}
       <h1>${esc(titulo)}</h1>
       <p class="desc">${esc(mensagem)}</p>
@@ -304,7 +304,7 @@ async function handleRequest(req, res, client) {
     }
   }
 
-  // POST /verify/api/complete — integração de site personalizado (contrato próprio do KRON, ver comentário no topo do arquivo)
+  // POST /verify/api/complete — integração de site personalizado (contrato próprio do KAEL, ver comentário no topo do arquivo)
   if (req.method === 'POST' && url.pathname === '/verify/api/complete') {
     if (!rateLimitOk(`api:${ip}`, 30, 60_000)) { res.writeHead(429); return res.end(JSON.stringify({ ok: false, erro: 'rate_limit' })); }
     let body = '';
@@ -338,7 +338,7 @@ async function handleRequest(req, res, client) {
     return;
   }
 
-  // GET /verify/:sessionId — página KRON (site padrão)
+  // GET /verify/:sessionId — página KAEL (site padrão)
   if (req.method === 'GET' && /^\/verify\/[a-f0-9]{48}$/.test(url.pathname)) {
     const id = url.pathname.split('/')[2];
     const session = getSessao(id);

@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/preflight.js — KRON SERVER TEMPLATES
+//  template-system/core/preflight.js — KAEL SERVER TEMPLATES
 //
 //  Antes de qualquer criação: valida o template, verifica permissões/hierarquia/
 //  limites do bot, detecta recursos que já existem e monta o PLANO de execução

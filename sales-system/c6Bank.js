@@ -158,7 +158,7 @@ async function criarPagamentoPix({ clientId, clientSecret, certificadoPath, senh
 
   // txid: identificador único da cobrança (igual ao padrão Bacen usado
   // pelos outros gateways deste projeto — 26 a 35 caracteres alfanuméricos).
-  const txidBruto = `kronc6${guildId}${clienteId}${Date.now()}`.replace(/[^a-zA-Z0-9]/g, '');
+  const txidBruto = `kaelc6${guildId}${clienteId}${Date.now()}`.replace(/[^a-zA-Z0-9]/g, '');
   const txid = txidBruto.slice(0, 35).padEnd(26, '0');
 
   // Vencimento em 1 dia (o mínimo prático pra uma cobrança "com

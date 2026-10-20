@@ -1,5 +1,5 @@
 // ═══════════════════════════════════════════════════════════════════════════
-//  template-system/core/recovery.js — KRON SERVER TEMPLATES
+//  template-system/core/recovery.js — KAEL SERVER TEMPLATES
 //
 //  Roda UMA VEZ no boot do bot (chamado a partir de index.js, junto com os
 //  outros "resistentes a restart" — sorteioScheduler, expiracaoScheduler etc.)
@@ -82,19 +82,19 @@ async function recuperar(client) {
         criados: { cargos: idsDe(criados.cargos), categorias: idsDe(criados.categorias), canais: idsDe(criados.canais) },
       });
 
-      console.log(`[KRON Templates] Recovery: guild ${guildId} tinha aplicação "${op.templateNome || op.slug}" interrompida (estágio ${op.estado}). Registrada como histórico ${entrada.id} — ${contagem.cargos} cargo(s), ${contagem.categorias} categoria(s), ${contagem.canais} canal(is) preservados.`);
+      console.log(`[KAEL Templates] Recovery: guild ${guildId} tinha aplicação "${op.templateNome || op.slug}" interrompida (estágio ${op.estado}). Registrada como histórico ${entrada.id} — ${contagem.cargos} cargo(s), ${contagem.categorias} categoria(s), ${contagem.canais} canal(is) preservados.`);
 
       if (client && op.userId) {
         const total3 = contagem.cargos + contagem.categorias + contagem.canais;
         await notificar(client, op.userId,
-          `O KRON Templates foi reiniciado enquanto o template **${op.templateNome || op.slug}** estava sendo aplicado no seu servidor.\n` +
+          `O KAEL Templates foi reiniciado enquanto o template **${op.templateNome || op.slug}** estava sendo aplicado no seu servidor.\n` +
           (total3 > 0
             ? `${contagem.cargos} cargo(s), ${contagem.categorias} categoria(s) e ${contagem.canais} canal(is) já tinham sido criados e foram preservados — nada foi apagado.\nAbra **/template → Histórico** para continuar manualmente ou usar **Desfazer**.`
             : `Nenhum recurso chegou a ser criado antes da interrupção. Pode abrir **/template** e aplicar novamente quando quiser.`));
       }
       total++;
     } catch (e) {
-      console.error(`[KRON Templates] Recovery: falha ao processar operação pendente da guild ${guildId}:`, e.message);
+      console.error(`[KAEL Templates] Recovery: falha ao processar operação pendente da guild ${guildId}:`, e.message);
     } finally {
       // Sempre fecha, mesmo se algo acima falhou — nunca deixar o índice
       // apontando pra uma operação "fantasma" pra sempre.
@@ -102,7 +102,7 @@ async function recuperar(client) {
     }
   }
 
-  if (total > 0) console.log(`[KRON Templates] Recovery: ${total} operação(ões) interrompida(s) recuperada(s).`);
+  if (total > 0) console.log(`[KAEL Templates] Recovery: ${total} operação(ões) interrompida(s) recuperada(s).`);
   return total;
 }
 

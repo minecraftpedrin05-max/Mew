@@ -1,6 +1,6 @@
 /**
  * ─────────────────────────────────────────────────────────────────
- *  KRON PRO — /limpar
+ *  KAEL — /limpar
  *  Apaga uma quantidade de mensagens do canal atual (bulk delete).
  * ─────────────────────────────────────────────────────────────────
  */
