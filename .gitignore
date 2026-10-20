@@ -61,5 +61,3 @@ database/licenses.sqlite
 database/database.backup-pre-multi-produto.json
 database/backups/
 *.bak*
-database/*.sqlite
-database/database*.json

@@ -1,2 +1,4 @@
+# O better-sqlite3 não acha binário pronto no Railway (Nix) e precisa compilar:
+# isso exige Python 3 e as ferramentas de build abaixo.
 [phases.setup]
 nixPkgs = ["...", "python3", "gcc", "gnumake", "pkg-config"]

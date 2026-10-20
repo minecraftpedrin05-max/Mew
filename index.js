@@ -135,6 +135,12 @@ client.once("ready", async () => {
   try { require('./sales-system/webhook').iniciarWebhook(client); }
   catch (e) { console.error('[Webhook] Falha ao iniciar o servidor HTTP:', e.message); }
 
+  // Avisa em todos os servidores o que mudou (só quando há uma atualização NOVA em config/atualizacoes.js)
+  setTimeout(() => {
+    require('./utils/anunciarAtualizacao').anunciarAtualizacoes(client)
+      .catch(e => console.error('[Atualização] Erro geral:', e.message));
+  }, 20 * 1000);
+
   // Kael HUD — backup automático dos servidores que ligaram essa opção
   try { require('./backup-system/backupManager').iniciarBackupAutomatico(client); }
   catch (e) { console.error('[HUD] Falha ao iniciar o backup automático:', e.message); }
@@ -292,6 +298,7 @@ client.on("inviteDelete", (invite) => {
 });
 
 client.on("guildCreate", async (guild) => {
+  try { require('./utils/anunciarAtualizacao').marcarServidorNovo(guild); } catch {}
   try {
     await require('./invite-system/inviteTracker').primeGuildCache(guild);
   } catch (e) {
