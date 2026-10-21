@@ -136,6 +136,45 @@ async execute(message){
     return require("../commands/minhascompras").enviarHistoricoCompras(message);
   }
 
+  // !diagnostico — mostra, DESTE servidor, quais comandos de barra o Discord enviou pro Kael
+  // (e se o bot foi adicionado com a permissão "applications.commands").
+  // !limparcomandos — apaga comandos antigos registrados SÓ neste servidor (podem atrapalhar).
+  {
+    const txt = message.content.trim().toLowerCase();
+    if (message.guild && (txt === "!diagnostico" || txt === "!limparcomandos")) {
+      const ehAdmin = message.member?.permissions?.has("Administrator");
+      if (!ehAdmin && message.author.id !== BOT_OWNER_ID) return;
+      const esperados = [...message.client.commands.values()]
+        .map(c => c.data?.name).filter(Boolean);
+      let globais = [], guildCmds = [], erroGuild = null;
+      try { globais = [...(await message.client.application.commands.fetch()).values()]; } catch (e) { erroGuild = "globais: " + e.message; }
+      try { guildCmds = [...(await message.guild.commands.fetch()).values()]; }
+      catch (e) { erroGuild = (e.code === 50001)
+        ? "❌ **Sem permissão `applications.commands` neste servidor** — o bot precisa ser reconvidado com esse escopo."
+        : "guild: " + e.message; }
+
+      if (txt === "!limparcomandos") {
+        let n = 0;
+        for (const c of guildCmds) { try { await c.delete(); n++; } catch {} }
+        return message.reply(`🧹 ${n} comando(s) antigo(s) específicos deste servidor foram apagados. Feche e abra o Discord.`);
+      }
+
+      const nomesGlobais = globais.map(c => c.name);
+      const faltando = esperados.filter(n => !nomesGlobais.includes(n));
+      const linhas = [
+        `**Servidor:** ${message.guild.name} (\`${message.guild.id}\`)`,
+        `**Bot:** ${message.client.user.tag} (\`${message.client.user.id}\`)`,
+        `**Comandos carregados no código:** ${esperados.length}`,
+        `**Registrados no Discord (globais):** ${globais.length}`,
+        `**Registrados SÓ neste servidor:** ${guildCmds.length}${guildCmds.length ? " → " + guildCmds.map(c => "/" + c.name).join(", ") : ""}`,
+        faltando.length ? `**⚠️ Faltando no Discord:** ${faltando.map(n => "/" + n).join(", ")}` : "✅ Nenhum comando faltando no Discord.",
+        erroGuild ? `**Alerta:** ${erroGuild}` : "✅ Escopo de comandos OK neste servidor.",
+        guildCmds.length ? "\nDica: use `!limparcomandos` para apagar os comandos específicos deste servidor." : "",
+      ].filter(Boolean);
+      return message.reply(linhas.join("\n").slice(0, 1900));
+    }
+  }
+
   if(message.content.trim() === "!ajuda"){
     const thumb = message.guild?.iconURL({ dynamic: true }) || undefined;
     const embed = new EmbedBuilder()

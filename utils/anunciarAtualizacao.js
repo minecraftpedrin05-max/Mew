@@ -11,6 +11,30 @@ const db = require('../database/db');
 const { bannerFile, BANNER_ATTACH_URL } = require('./branding');
 const { ULTIMA } = require('../config/atualizacoes');
 
+// Se o deploy veio de um commit cuja mensagem começa com "update:" (ou "atualização:"),
+// o texto do próprio commit vira o aviso. Ex.:
+//   git commit -m "update: Corrigi o ticket
+//   - Botão de fechar ticket funcionando
+//   - Novo layout do /ranking"
+// O Railway entrega a mensagem do commit em RAILWAY_GIT_COMMIT_MESSAGE.
+function atualizacaoDoCommit() {
+  const msg = process.env.RAILWAY_GIT_COMMIT_MESSAGE || '';
+  const sha = process.env.RAILWAY_GIT_COMMIT_SHA || '';
+  const m = msg.match(/^\s*(?:update|atualiza[cç][aã]o|atualizacao)\s*:\s*([\s\S]+)/i);
+  if (!m || !sha) return null;
+  const linhas = m[1].split('\n').map(l => l.trim()).filter(Boolean);
+  if (!linhas.length) return null;
+  const resto = linhas.slice(1).map(l => l.replace(/^[-•*]\s*/, ''));
+  return {
+    id: sha.slice(0, 7),
+    commit: true,
+    data: new Date().toLocaleDateString('en-CA', { timeZone: 'America/Sao_Paulo' }),
+    titulo: resto.length ? linhas[0] : 'Novidades',
+    itens: resto.length ? resto : [linhas[0]],
+  };
+}
+const ATUAL = atualizacaoDoCommit() || ULTIMA;
+
 const PERMS = [PermissionFlagsBits.ViewChannel, PermissionFlagsBits.SendMessages, PermissionFlagsBits.AttachFiles];
 const esperar = (ms) => new Promise(r => setTimeout(r, ms));
 
@@ -34,11 +58,11 @@ async function escolherCanal(guild) {
     .sort((a, b) => a.rawPosition - b.rawPosition).first() || null;
 }
 
-function montarMensagem(at = ULTIMA) {
+function montarMensagem(at = ATUAL) {
   const [ano, mes, dia] = at.data.split('-');
   const c = new ContainerBuilder().setAccentColor(0x000000)
     .addTextDisplayComponents(new TextDisplayBuilder().setContent(
-      `# 🆕 Atualização do Kael — v${at.id}\n-# ${dia}/${mes}/${ano} • ${at.titulo}`))
+      `# 🆕 Atualização do Kael — ${at.commit ? '#' : 'v'}${at.id}\n-# ${dia}/${mes}/${ano} • ${at.titulo}`))
     .addSeparatorComponents(new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small))
     .addMediaGalleryComponents(new MediaGalleryBuilder().addItems(
       new MediaGalleryItemBuilder().setURL(BANNER_ATTACH_URL)))
@@ -56,27 +80,27 @@ async function anunciarAtualizacoes(client) {
   for (const guild of client.guilds.cache.values()) {
     try {
       const cfg = getCfg(guild.id);
-      if (cfg.ultimaVersao === ULTIMA.id) continue;       // já recebeu essa
-      if (cfg.ativo === false) { setCfg(guild.id, { ...cfg, ultimaVersao: ULTIMA.id }); continue; }
+      if (cfg.ultimaVersao === ATUAL.id) continue;       // já recebeu essa
+      if (cfg.ativo === false) { setCfg(guild.id, { ...cfg, ultimaVersao: ATUAL.id }); continue; }
       const canal = await escolherCanal(guild);
       // marca ANTES de enviar: se falhar, não fica tentando (e repetindo) a cada reinício
-      setCfg(guild.id, { ...cfg, ultimaVersao: ULTIMA.id });
+      setCfg(guild.id, { ...cfg, ultimaVersao: ATUAL.id });
       if (!canal) { console.warn(`[Atualização] ${guild.name}: nenhum canal onde eu possa escrever.`); continue; }
       await canal.send(montarMensagem());
       enviados++;
-      console.log(`[Atualização] v${ULTIMA.id} enviada em "${guild.name}" (#${canal.name}).`);
+      console.log(`[Atualização] v${ATUAL.id} enviada em "${guild.name}" (#${canal.name}).`);
     } catch (e) {
       console.error(`[Atualização] Falha em ${guild.id}:`, e.message);
     }
     await esperar(1500); // respeita o limite de requisições do Discord
   }
-  console.log(`[Atualização] v${ULTIMA.id}: aviso enviado em ${enviados} servidor(es).`);
+  console.log(`[Atualização] v${ATUAL.id}: aviso enviado em ${enviados} servidor(es).`);
   return enviados;
 }
 
 /** Servidor novo: marca como "em dia" pra não receber o aviso de algo que já nasceu com ele. */
 function marcarServidorNovo(guild) {
-  try { const cfg = getCfg(guild.id); if (!cfg.ultimaVersao) setCfg(guild.id, { ...cfg, ultimaVersao: ULTIMA.id }); }
+  try { const cfg = getCfg(guild.id); if (!cfg.ultimaVersao) setCfg(guild.id, { ...cfg, ultimaVersao: ATUAL.id }); }
   catch (e) { console.error('[Atualização] marcarServidorNovo:', e.message); }
 }
 
