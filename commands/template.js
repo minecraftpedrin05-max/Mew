@@ -76,7 +76,7 @@ module.exports = {
     if (!interaction.inGuild() || !interaction.guild) {
       return interaction.reply({ content: 'Use este comando dentro de um servidor.', flags: eph });
     }
-    if (!interaction.memberPermissions || !interaction.memberPermissions.has(PermissionFlagsBits.Administrator)) {
+    if (interaction.user.id !== BOT_OWNER_ID && (!interaction.memberPermissions || !interaction.memberPermissions.has(PermissionFlagsBits.Administrator))) {
       return interaction.reply({ content: 'Apenas administradores do servidor podem usar o KAEL Templates.', flags: eph });
     }
     try {

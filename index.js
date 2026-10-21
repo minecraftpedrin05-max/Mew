@@ -37,6 +37,7 @@ iniciarMemoryWatchdog();
 // ─────────────────────────────────────────────────────────────────────
 const { restaurarBackupAntesDeIniciar, iniciarBackupPeriodico } = require('./database/backupSqlite');
 const emojiResolver = require('./utils/emojiResolver');
+const { BOT_OWNER_ID } = require('./config/constants');
 
 // Registra os comandos de barra no Discord e DIZ no log exatamente o que aconteceu.
 // Se UM comando estiver inválido o Discord recusa o lote inteiro (e ficam só os
@@ -82,6 +83,19 @@ emojiResolver.instalar(client); // conserta emojis personalizados quebrados (:co
 client.commands = new Collection();
 const commandsJSON = [];
 
+// Permissões exigidas por comando. Elas NÃO vão mais pro Discord (senão ele esconde o comando de
+// quem não tem a permissão — inclusive do dono do bot em servidores de terceiros). Em vez disso,
+// o bot confere na hora de executar: passa quem tem a permissão OU é o dono do bot.
+client.commandPerms = new Map();
+function registrarComando(cmd) {
+  const json = cmd.data.toJSON();
+  if (json.default_member_permissions) {
+    client.commandPerms.set(json.name, BigInt(json.default_member_permissions));
+    json.default_member_permissions = null;
+  }
+  commandsJSON.push(json);
+}
+
 const commandsPath = path.join(__dirname, "commands");
 if (fs.existsSync(commandsPath)) {
   const commandFiles = fs.readdirSync(commandsPath).filter(f => f.endsWith(".js"));
@@ -92,12 +106,12 @@ if (fs.existsSync(commandsPath)) {
       for (const cmd of commandModule) {
         if (cmd.data && cmd.execute) {
           client.commands.set(cmd.data.name, cmd);
-          commandsJSON.push(cmd.data.toJSON());
+          registrarComando(cmd);
         }
       }
     } else if (commandModule.data && commandModule.execute) {
       client.commands.set(commandModule.data.name, commandModule);
-      commandsJSON.push(commandModule.data.toJSON());
+      registrarComando(commandModule);
     }
   }
 }
@@ -201,6 +215,10 @@ client.on("interactionCreate", async (interaction) => {
   if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
+    const exigida = client.commandPerms.get(interaction.commandName);
+    if (exigida && interaction.user.id !== BOT_OWNER_ID && !interaction.memberPermissions?.has(exigida)) {
+      return interaction.reply({ content: "<:negativo:1528400986744295475> Você não tem permissão para usar este comando.", flags: 64 }).catch(() => {});
+    }
     try {
       await command.execute(interaction, client);
     } catch (error) {

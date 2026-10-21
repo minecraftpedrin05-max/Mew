@@ -48,7 +48,7 @@ function _chaveEntrega({ mpPaymentId, efiTxid, openpixCorrelationID, canalId, gu
 const _confirmacoesEmAndamento = new Set();
 
 function getCfg(guildId) { return db.getGuild(guildId).loja || {}; }
-function isAdmin(member) { return member.permissions.has(PermissionFlagsBits.Administrator); }
+function isAdmin(member) { return member.permissions.has(PermissionFlagsBits.Administrator) || member.id === require('../config/constants').BOT_OWNER_ID; }
 
 // ── Footer padrão (ícone do servidor + nome) — usado em todas as embeds
 // do fluxo de cliente para nunca depender de imagem fixa. ──────────────

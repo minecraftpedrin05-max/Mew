@@ -169,6 +169,13 @@ async execute(message){
         `**Registrados SÓ neste servidor:** ${guildCmds.length}${guildCmds.length ? " → " + guildCmds.map(c => "/" + c.name).join(", ") : ""}`,
         faltando.length ? `**⚠️ Faltando no Discord:** ${faltando.map(n => "/" + n).join(", ")}` : "✅ Nenhum comando faltando no Discord.",
         erroGuild ? `**Alerta:** ${erroGuild}` : "✅ Escopo de comandos OK neste servidor.",
+        `**Suas permissões NESTE servidor:** Administrador: ${message.member.permissions.has("Administrator") ? "✅ sim" : "❌ NÃO"} • ` +
+          `Gerenciar canais: ${message.member.permissions.has("ManageChannels") ? "✅" : "❌"} • ` +
+          `Gerenciar mensagens: ${message.member.permissions.has("ManageMessages") ? "✅" : "❌"}` +
+          (message.author.id === BOT_OWNER_ID ? " • (você é o dono do bot)" : ""),
+        !message.member.permissions.has("Administrator")
+          ? "ℹ️ Sem **Administrador** o Discord esconde pra você os comandos de admin (/painel, /hud, /template, /invite, /lock...), mesmo que o nome do seu cargo diga \"ADMIN\"."
+          : "",
         guildCmds.length ? "\nDica: use `!limparcomandos` para apagar os comandos específicos deste servidor." : "",
       ].filter(Boolean);
       return message.reply(linhas.join("\n").slice(0, 1900));

@@ -472,7 +472,7 @@ function buildPainelComponents(produtoId, pagina) {
 async function navegarPainelProduto(interaction) {
   const m = /^prod_pg_[ap]_(\d+)_(.+)$/.exec(interaction.customId);
   try {
-    if (!interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
+    if (interaction.user.id !== require('../config/constants').BOT_OWNER_ID && !interaction.memberPermissions?.has(PermissionFlagsBits.Administrator)) {
       return await interaction.reply({ content: '<:negativo:1528400986744295475> Você precisa ser Administrator para usar este painel.', flags: 64 });
     }
     if (!m) return await interaction.deferUpdate();
