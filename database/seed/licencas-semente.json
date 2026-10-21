@@ -1,0 +1,21 @@
+{
+  "_aviso": "Licenças que são recriadas se o banco vier vazio (ex.: deploy sem Volume). Adicione aqui os servidores que NUNCA podem perder a licença.",
+  "licencas": [
+    {
+      "guild_id": "1493728644059631727",
+      "tipo": "PERMANENTE",
+      "ativado_por": "1242005187019669596",
+      "ativado_em": "2026-05-25T23:40:19.770Z",
+      "expiry": null,
+      "dias": "permanente"
+    },
+    {
+      "guild_id": "1512625840792539197",
+      "tipo": "PERMANENTE",
+      "ativado_por": "1242005187019669596",
+      "ativado_em": "2026-06-19T19:52:12.460Z",
+      "expiry": null,
+      "dias": "permanente"
+    }
+  ]
+}

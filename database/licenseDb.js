@@ -119,6 +119,33 @@ CREATE TABLE IF NOT EXISTS activation_requests (
   }
 })();
 
+// ═══════════════════════════════════════════════════════
+// SEMENTE DE LICENÇAS — garante que licenças importantes NUNCA se percam num deploy.
+// Se o banco vier vazio (Railway sem Volume reinicia o disco a cada atualização),
+// as licenças listadas em database/seed/licencas-semente.json são recriadas.
+// INSERT OR IGNORE: nunca sobrescreve nem remove nada que já exista. Roda 1x por banco
+// (marcador na tabela `meta`), então um /license remove feito depois é respeitado.
+// ═══════════════════════════════════════════════════════
+(function aplicarSementeLicencas() {
+  try {
+    db.exec('CREATE TABLE IF NOT EXISTS meta (k TEXT PRIMARY KEY, v TEXT)');
+    if (db.prepare("SELECT 1 FROM meta WHERE k = 'semente_licencas_v1'").get()) return;
+    const arq = path.join(__dirname, 'seed', 'licencas-semente.json');
+    if (fs.existsSync(arq)) {
+      const lista = JSON.parse(fs.readFileSync(arq, 'utf8')).licencas || [];
+      const ins = db.prepare(`INSERT OR IGNORE INTO licenses (guild_id, chave, tipo, ativado_por, ativado_em, expiry, dias)
+        VALUES (@guild_id, NULL, @tipo, @ativado_por, @ativado_em, @expiry, @dias)`);
+      let n = 0;
+      for (const l of lista) n += ins.run({ guild_id: String(l.guild_id), tipo: l.tipo || 'PERMANENTE', ativado_por: l.ativado_por || null,
+        ativado_em: l.ativado_em || null, expiry: l.expiry || null, dias: String(l.dias ?? 'permanente') }).changes;
+      if (n) console.log(`[licenseDb] ${n} licença(s) restaurada(s) a partir da semente.`);
+    }
+    db.prepare("INSERT OR REPLACE INTO meta (k, v) VALUES ('semente_licencas_v1', ?)").run(new Date().toISOString());
+  } catch (e) {
+    console.error('[licenseDb] Falha ao aplicar a semente de licenças:', e.message);
+  }
+})();
+
 // ═══════════════════════════════════════════════════════════════════
 // PREPARED STATEMENTS
 // ═══════════════════════════════════════════════════════════════════

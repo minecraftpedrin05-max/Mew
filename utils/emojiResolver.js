@@ -75,11 +75,7 @@ function resolverUm(animated, nome, id) {
   return false;                                              // sem emoji → fallback unicode
 }
 
-function reescreverTexto(s, plain = true) {
-  if (s.indexOf('{') !== -1 && /\{separador\}/i.test(s)) {
-    s = s.split('\n').map(l => (RE_SEPARADOR_LINHA.test(l) ? BARRA : l)).join('\n');
-  }
-  if (!pronto || s.indexOf(':') === -1) return s;
+function trocarEmojis(s, plain) {
   return s.replace(RE_EMOJI, (m, a, nome, id, nomePlain) => {
     if (nomePlain) {                                   // :nome: solto
       if (!plain) return m;
@@ -91,6 +87,16 @@ function reescreverTexto(s, plain = true) {
     if (r === false) return FALLBACK[nome] || '▫️';
     return `<${r.animated ? 'a' : ''}:${nome}:${r.id}>`;
   });
+}
+
+function reescreverTexto(s, plain = true) {
+  if (s.indexOf('{') !== -1 && /\{separador\}/i.test(s)) {
+    s = s.split('\n').map(l => (RE_SEPARADOR_LINHA.test(l) ? BARRA : l)).join('\n');
+  }
+  if (!pronto || s.indexOf(':') === -1) return s;
+  if (s.indexOf('`') === -1) return trocarEmojis(s, plain);
+  // texto entre crases (`:nome:` ou bloco ```) é exibido como está
+  return s.split(/(```[\s\S]*?```|`[^`\n]*`)/).map((parte, i) => (i % 2 ? parte : trocarEmojis(parte, plain))).join('');
 }
 
 function ehObjetoEmoji(o) {

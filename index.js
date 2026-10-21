@@ -151,6 +151,14 @@ client.once("ready", async () => {
     console.error("Erro ao registrar os comandos na API:", error);
   }
 
+  // Aviso: na Railway sem Volume o disco é apagado a cada atualização (licenças e vendas somem).
+  if ((process.env.RAILWAY_ENVIRONMENT || process.env.RAILWAY_SERVICE_ID) && !process.env.RAILWAY_VOLUME_MOUNT_PATH) {
+    const aviso = '⚠️ **Sem Volume na Railway**: o banco (licenças, vendas, configs) é apagado a cada atualização. ' +
+      'No Railway: serviço → **Settings → Volumes → New Volume** com Mount Path `/data`. Depois disso os dados passam a ficar salvos.';
+    console.warn('[Dados] ' + aviso.replace(/\*\*/g, ''));
+    client.users.fetch(BOT_OWNER_ID).then(u => u.send(aviso)).catch(() => {});
+  }
+
   // Servidor HTTP (webhooks de pagamento Mercado Pago/OpenPix + verificação web).
   // Antes essa função existia mas nunca era chamada.
   try { require('./sales-system/webhook').iniciarWebhook(client); }
