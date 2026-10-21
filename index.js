@@ -43,6 +43,7 @@ const { BOT_OWNER_ID } = require('./config/constants');
 // Se UM comando estiver inválido o Discord recusa o lote inteiro (e ficam só os
 // comandos antigos). Nesse caso registramos um por um pra isolar o culpado.
 async function sincronizarComandos(rest, commandsJSON) {
+  client.errosRegistro = [];
   const nomes = commandsJSON.map(c => c.name);
   console.log(`[Comandos] Carregados ${nomes.length}: ${nomes.join(', ')}`);
   try {
@@ -51,6 +52,7 @@ async function sincronizarComandos(rest, commandsJSON) {
     return;
   } catch (error) {
     console.error('[Comandos] O Discord recusou o lote inteiro:', error?.rawError ? JSON.stringify(error.rawError.errors || error.rawError) : error);
+    client.errosRegistro.push({ nome: '(lote inteiro)', msg: error?.rawError ? JSON.stringify(error.rawError.errors || error.rawError).slice(0, 600) : String(error.message || error) });
   }
   let ok = 0;
   for (const cmd of commandsJSON) {
@@ -59,6 +61,7 @@ async function sincronizarComandos(rest, commandsJSON) {
       ok++;
     } catch (e) {
       console.error(`[Comandos] ❌ "/${cmd.name}" inválido e NÃO registrado:`, e?.rawError ? JSON.stringify(e.rawError.errors || e.rawError) : e.message);
+      client.errosRegistro.push({ nome: cmd.name, msg: e?.rawError ? JSON.stringify(e.rawError.errors || e.rawError).slice(0, 600) : String(e.message) });
     }
   }
   console.log(`[Comandos] Registro individual: ${ok}/${commandsJSON.length} comandos registrados.`);
@@ -140,6 +143,10 @@ client.once("ready", async () => {
   try {
     const rest = new REST({ version: "10" }).setToken(TOKEN);
     await sincronizarComandos(rest, commandsJSON);
+    if (client.errosRegistro?.length) {   // avisa o dono por DM quando algum comando for recusado
+      const txt = client.errosRegistro.map(e => `• /${e.nome}: ${e.msg}`).join('\n').slice(0, 1800);
+      client.users.fetch(BOT_OWNER_ID).then(u => u.send(`⚠️ O Discord recusou comando(s) ao iniciar:\n${txt}`)).catch(() => {});
+    }
   } catch (error) {
     console.error("Erro ao registrar os comandos na API:", error);
   }

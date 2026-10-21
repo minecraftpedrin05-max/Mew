@@ -167,6 +167,9 @@ async execute(message){
         `**Comandos carregados no código:** ${esperados.length}`,
         `**Registrados no Discord (globais):** ${globais.length}`,
         `**Registrados SÓ neste servidor:** ${guildCmds.length}${guildCmds.length ? " → " + guildCmds.map(c => "/" + c.name).join(", ") : ""}`,
+        (message.client.errosRegistro || []).length
+          ? "**❌ Erros ao registrar comandos:**\n" + message.client.errosRegistro.map(e => `• /${e.nome}: ${e.msg}`).join("\n").slice(0, 700)
+          : "",
         faltando.length ? `**⚠️ Faltando no Discord:** ${faltando.map(n => "/" + n).join(", ")}` : "✅ Nenhum comando faltando no Discord.",
         erroGuild ? `**Alerta:** ${erroGuild}` : "✅ Escopo de comandos OK neste servidor.",
         `**Suas permissões NESTE servidor:** Administrador: ${message.member.permissions.has("Administrator") ? "✅ sim" : "❌ NÃO"} • ` +

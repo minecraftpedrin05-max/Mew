@@ -358,7 +358,7 @@ function buildEditorContainer(cfg, guild) {
       new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('tkt_layout_textbase')   .setLabel('Editar Texto').setEmoji('<:editar:1528400388137549864>') .setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId('tkt_layout_add_texto')  .setLabel('Add Texto')   .setEmoji('📝') .setStyle(ButtonStyle.Primary),
-        new ButtonBuilder().setCustomId('tkt_layout_add_divisor').setLabel('Add Divisor') .setEmoji('➖') .setStyle(ButtonStyle.Primary),
+        new ButtonBuilder().setCustomId('tkt_layout_atalhos').setLabel('Atalhos') .setEmoji('<:raio:1533080818258411662>') .setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId('tkt_layout_add_midia')  .setLabel('Add Mídia')   .setEmoji('<:foto:1533080648196292679>').setStyle(ButtonStyle.Primary),
         new ButtonBuilder().setCustomId('tkt_layout_thumbnail')  .setLabel('Thumbnail')   .setEmoji('<:foto:1533080648196292679>').setStyle(ButtonStyle.Primary),
       )
@@ -1470,7 +1470,8 @@ async function handleButton(interaction) {
   // ── Editor de layout (dentro do editor — usa update) ──
   if (id === 'tkt_layout_textbase')        return modalEditarTextoBase(interaction);
   if (id === 'tkt_layout_add_texto')       return modalAddTexto(interaction);
-  if (id === 'tkt_layout_add_divisor')     return modalAddDivisor(interaction);
+  if (id === 'tkt_layout_atalhos')         return require('../utils/atalhos').mostrarAtalhos(interaction);
+  if (id === 'tkt_layout_add_divisor')     return modalAddDivisor(interaction); // botões de painéis antigos ainda publicados
   if (id === 'tkt_layout_add_midia')       return modalAddMidia(interaction);
   if (id === 'tkt_layout_thumbnail')       return modalThumbnail(interaction);
   if (id === 'tkt_layout_estrutura')       return gerenciarEstrutura(interaction);
