@@ -27,6 +27,29 @@ const EPH_V2 = MessageFlags.Ephemeral | MessageFlags.IsComponentsV2;
 const POR_PAGINA = 4;                       // entradas por página no painel do atendente (cabe nas 5 linhas de botões)
 const sleep = (ms) => new Promise(r => setTimeout(r, ms));
 
+// Emojis personalizados do Kael (mesmos IDs usados no resto do bot)
+const E = {
+  ok:      '<:positivo:1528401238197276702>',
+  erro:    '<:negativo:1528400986744295475>',
+  voz:     '<:users:1528840901739151430>',
+  user:    '<:user:1532137085081878558>',
+  sino:    '<:sino:1528840971096297482>',
+  relogio: '<:clock:1524207889441357917>',
+  painel:  '<:embed:1528400492982571111>',
+  config:  '<:config3:1524208114327617588>',
+  canal:   '<:canal:1524207214791884890>',
+  cargo:   '<:safety:1528841000548569239>',
+  postar:  '<:arrow:1524206792626933831>',
+  apagar:  '<:apagar:1524206738885050388>',
+  voltar:  '<:voltar:1528548726518448198>',
+  pedido:  '<:pedidoSolicitado:1528401082777342044>',
+  entregue:'<:pedidoEntregue:1528401023054385202>',
+  raio:    '<:raio:1533080818258411662>',
+  tools:   '<:tools1:1533222180408791080>',
+  texto:   '<:text:1533089802856038461>',
+  parar:   '<:npertubar:1533081528966316083>',
+};
+
 const txt = (t) => new TextDisplayBuilder().setContent(t);
 const sep = () => new SeparatorBuilder().setDivider(true).setSpacing(SeparatorSpacingSize.Small);
 
@@ -55,6 +78,14 @@ async function contexto(interaction, gid) {
   return { guild, member };
 }
 const emDM = (interaction) => !interaction.guild;
+/** Mensagem curta em container (emoji personalizado + separador), no lugar de texto solto. */
+function aviso(emoji, titulo, corpo, { efemero = true } = {}) {
+  const c = new ContainerBuilder().setAccentColor(COR).addTextDisplayComponents(txt(`${emoji}  **${titulo}**`));
+  if (corpo) { c.addSeparatorComponents(sep()); c.addTextDisplayComponents(txt(corpo)); }
+  return { components: [c], flags: efemero ? EPH_V2 : MessageFlags.IsComponentsV2 };
+}
+const avisoCanal = (emoji, titulo, corpo) => aviso(emoji, titulo, corpo, { efemero: false });
+const avisoI = (interaction, emoji, titulo, corpo) => aviso(emoji, titulo, corpo, { efemero: !emDM(interaction) });
 const soComp = (payload) => ({ components: payload.components, flags: MessageFlags.IsComponentsV2 });
 const flagsPainel = (interaction) => (emDM(interaction) ? MessageFlags.IsComponentsV2 : EPH_V2);
 
@@ -62,29 +93,34 @@ const flagsPainel = (interaction) => (emDM(interaction) ? MessageFlags.IsCompone
 async function showEscolha(interaction) {
   const c = new ContainerBuilder().setAccentColor(COR)
     .addTextDisplayComponents(txt(
-      '## 🎫 Suporte\nEscolha o que você quer configurar:\n\n' +
-      '**Ticket (chat):** painel de tickets com categorias, canal, logs e cargos.\n' +
-      '**Suporte por voz:** sala de espera em call, com fila e painel de atendentes.'))
+      `## ${E.painel}  Suporte\nEscolha o que você quer configurar:`))
+    .addSeparatorComponents(sep())
+    .addTextDisplayComponents(txt(
+      `${E.canal}  **Ticket (chat):** painel de tickets com categorias, canal, logs e cargos.\n` +
+      `${E.voz}  **Suporte por voz:** sala de espera em call, com fila e painel de atendentes.`))
+    .addSeparatorComponents(sep())
     .addActionRowComponents(new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('vsup_go_chat').setLabel('Ticket (chat)').setEmoji('💬').setStyle(ButtonStyle.Primary),
-      new ButtonBuilder().setCustomId('vsup_go_voz').setLabel('Suporte por voz').setEmoji('🎧').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('vsup_go_chat').setLabel('Ticket (chat)').setEmoji(E.canal).setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('vsup_go_voz').setLabel('Suporte por voz').setEmoji(E.voz).setStyle(ButtonStyle.Primary),
     ));
   return interaction.reply({ components: [c], flags: EPH_V2 });
 }
 
 // ───────────────────────────── 2) painel de configuração ─────────────────────────────
-function linhaOk(ok) { return ok ? '✅' : '❌'; }
+function linhaOk(ok) { return ok ? E.ok : E.erro; }
 
 function buildConfigPayload(guild, aviso = null) {
   const cfg = getCfg(guild.id);
   const c = new ContainerBuilder().setAccentColor(COR);
   if (aviso) { c.addTextDisplayComponents(txt(aviso)); c.addSeparatorComponents(sep()); }
   c.addTextDisplayComponents(txt(
-    '## 🎧 Suporte por voz\n' +
-    `${linhaOk(cfg.canalId)} **Canal de voz:** ${cfg.canalId ? `<#${cfg.canalId}>` : 'não definido'}\n` +
-    `${linhaOk(cfg.cargosSuporte.length)} **Cargos de atendentes:** ${cfg.cargosSuporte.length ? cfg.cargosSuporte.map(r => `<@&${r}>`).join(' ') : 'não definidos'}\n` +
-    `${linhaOk(cfg.cargoAtendId)} **Cargo "em atendimento":** ${cfg.cargoAtendId ? `<@&${cfg.cargoAtendId}>` : 'será criado automaticamente'}\n` +
-    `${linhaOk(cfg.ativo)} **Painel:** ${cfg.ativo ? 'ativo no chat da call' : 'ainda não postado'}`));
+    `## ${E.voz}  Suporte por voz`));
+  c.addSeparatorComponents(sep());
+  c.addTextDisplayComponents(txt(
+    `${linhaOk(cfg.canalId)} ${E.canal} **Canal de voz:** ${cfg.canalId ? `<#${cfg.canalId}>` : 'não definido'}\n` +
+    `${linhaOk(cfg.cargosSuporte.length)} ${E.cargo} **Cargos de atendentes:** ${cfg.cargosSuporte.length ? cfg.cargosSuporte.map(r => `<@&${r}>`).join(' ') : 'não definidos'}\n` +
+    `${linhaOk(cfg.cargoAtendId)} ${E.config} **Cargo "em atendimento":** ${cfg.cargoAtendId ? `<@&${cfg.cargoAtendId}>` : 'será criado automaticamente'}\n` +
+    `${linhaOk(cfg.ativo)} ${E.painel} **Painel:** ${cfg.ativo ? 'ativo no chat da call' : 'ainda não postado'}`));
   c.addSeparatorComponents(sep());
   c.addActionRowComponents(new ActionRowBuilder().addComponents(
     new ChannelSelectMenuBuilder().setCustomId('vsup_cfg_canal').setChannelTypes(ChannelType.GuildVoice)
@@ -96,8 +132,8 @@ function buildConfigPayload(guild, aviso = null) {
     new RoleSelectMenuBuilder().setCustomId('vsup_cfg_atend')
       .setPlaceholder('Cargo "em atendimento" (opcional)').setMinValues(1).setMaxValues(1)));
   c.addActionRowComponents(new ActionRowBuilder().addComponents(
-    new ButtonBuilder().setCustomId('vsup_cfg_postar').setLabel(cfg.ativo ? 'Repostar painel' : 'Postar painel').setEmoji('📌').setStyle(ButtonStyle.Success),
-    new ButtonBuilder().setCustomId('vsup_cfg_desativar').setLabel('Desativar').setEmoji('🛑').setStyle(ButtonStyle.Danger).setDisabled(!cfg.ativo),
+    new ButtonBuilder().setCustomId('vsup_cfg_postar').setLabel(cfg.ativo ? 'Repostar painel' : 'Postar painel').setEmoji(E.postar).setStyle(ButtonStyle.Success),
+    new ButtonBuilder().setCustomId('vsup_cfg_desativar').setLabel('Desativar').setEmoji(E.apagar).setStyle(ButtonStyle.Danger).setDisabled(!cfg.ativo),
   ));
   return { components: [c], flags: EPH_V2 };
 }
@@ -105,13 +141,18 @@ function buildConfigPayload(guild, aviso = null) {
 function painelPublico() {
   const c = new ContainerBuilder().setAccentColor(COR)
     .addTextDisplayComponents(txt(
-      '# 🎧 Suporte por voz\n' +
-      'Sua fala está **bloqueada** nesta call até um atendente te atender.\n\n' +
-      '1. Toque em **Pedir atendimento**.\n2. Aguarde aqui na call.\n3. Quando um atendente aceitar, sua fala é liberada.'))
+      `# ${E.voz}  Suporte por voz\n` +
+      `${E.parar}  Sua fala está **bloqueada** nesta call até um atendente te atender.`))
+    .addSeparatorComponents(sep())
+    .addTextDisplayComponents(txt(
+      `${E.pedido}  Toque em **Pedir atendimento**.\n` +
+      `${E.relogio}  Aguarde aqui na call.\n` +
+      `${E.ok}  Quando um atendente aceitar, sua fala é liberada.`))
+    .addSeparatorComponents(sep())
     .addActionRowComponents(new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId('vsup_pedir').setLabel('Pedir atendimento').setEmoji('🙋').setStyle(ButtonStyle.Success),
-      new ButtonBuilder().setCustomId('vsup_sair').setLabel('Sair da fila').setEmoji('↩️').setStyle(ButtonStyle.Secondary),
-      new ButtonBuilder().setCustomId('vsup_painel').setLabel('Painel Atendente').setEmoji('🛠️').setStyle(ButtonStyle.Primary),
+      new ButtonBuilder().setCustomId('vsup_pedir').setLabel('Pedir atendimento').setEmoji(E.pedido).setStyle(ButtonStyle.Success),
+      new ButtonBuilder().setCustomId('vsup_sair').setLabel('Sair da fila').setEmoji(E.voltar).setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder().setCustomId('vsup_painel').setLabel('Painel Atendente').setEmoji(E.painel).setStyle(ButtonStyle.Primary),
     ));
   return { components: [c], flags: MessageFlags.IsComponentsV2 };
 }
@@ -137,8 +178,8 @@ async function removerPermissoes(guild, cfg) {
 async function postarPainel(interaction) {
   const { guild } = await contexto(interaction);
   let cfg = getCfg(guild.id);
-  if (!cfg.canalId) return interaction.update(buildConfigPayload(guild, '❌ Escolha primeiro o **canal de voz**.'));
-  if (!cfg.cargosSuporte.length) return interaction.update(buildConfigPayload(guild, '❌ Escolha pelo menos um **cargo de atendente**.'));
+  if (!cfg.canalId) return interaction.update(buildConfigPayload(guild, `${E.erro}  Escolha primeiro o **canal de voz**.`));
+  if (!cfg.cargosSuporte.length) return interaction.update(buildConfigPayload(guild, `${E.erro}  Escolha pelo menos um **cargo de atendente**.`));
   await interaction.deferUpdate();
   try {
     if (!cfg.cargoAtendId || !guild.roles.cache.has(cfg.cargoAtendId)) {
@@ -149,11 +190,11 @@ async function postarPainel(interaction) {
     if (cfg.painelMsgId) await canal.messages.delete(cfg.painelMsgId).catch(() => {});
     const msg = await canal.send(painelPublico());
     saveCfg(guild.id, { ...cfg, ativo: true, painelMsgId: msg.id });
-    return interaction.editReply(soComp(buildConfigPayload(guild, `✅ Painel postado no chat de <#${canal.id}>. A fala nessa call agora está bloqueada para quem não for atendido.`)));
+    return interaction.editReply(soComp(buildConfigPayload(guild, `${E.ok}  Painel postado no chat de <#${canal.id}>. A fala nessa call agora está bloqueada para quem não for atendido.`)));
   } catch (e) {
     console.error('[SuporteVoz] Erro ao postar painel:', e);
     return interaction.editReply(soComp(buildConfigPayload(guild,
-      `❌ Não consegui configurar: ${e.message}\nConfira se o Kael tem **Gerenciar cargos**, **Gerenciar canais** e acesso ao canal de voz, e se o cargo do Kael está **acima** dos cargos escolhidos.`)));
+      `${E.erro}  Não consegui configurar: ${e.message}\nConfira se o Kael tem **Gerenciar cargos**, **Gerenciar canais** e acesso ao canal de voz, e se o cargo do Kael está **acima** dos cargos escolhidos.`)));
   }
 }
 
@@ -172,45 +213,65 @@ async function desativar(interaction) {
     if (canal) await canal.messages.delete(cfg.painelMsgId).catch(() => {});
   }
   saveCfg(guild.id, { ...cfg, ativo: false, painelMsgId: null, fila: [], atendimentos: {} });
-  return interaction.editReply(soComp(buildConfigPayload(guild, '🛑 Suporte por voz desativado. A call voltou ao normal.')));
+  return interaction.editReply(soComp(buildConfigPayload(guild, `${E.apagar}  Suporte por voz desativado. A call voltou ao normal.`)));
 }
 
 // ───────────────────────────── 3) cliente: pedir atendimento ─────────────────────────────
 async function pedirAtendimento(interaction) {
   const guild = interaction.guild;
   const cfg = getCfg(guild.id);
-  const eph = { flags: MessageFlags.Ephemeral };
-  if (!cfg.ativo) return interaction.reply({ content: '❌ O suporte por voz está desativado.', ...eph });
+  if (!cfg.ativo) return interaction.reply(aviso(E.erro, 'Suporte por voz desativado', 'O suporte por voz está desativado neste servidor.'));
   if (interaction.member.voice?.channelId !== cfg.canalId) {
-    return interaction.reply({ content: `❌ Entre primeiro na call <#${cfg.canalId}> e depois peça o atendimento.`, ...eph });
+    return interaction.reply(aviso(E.erro, 'Entre na call primeiro', `Entre na call <#${cfg.canalId}> e depois peça o atendimento.`));
   }
   const uid = interaction.user.id;
-  if (cfg.atendimentos[uid]) return interaction.reply({ content: '🎧 Você já está sendo atendido.', ...eph });
+  if (cfg.atendimentos[uid]) return interaction.reply(aviso(E.voz, 'Você já está sendo atendido'));
   const pos = cfg.fila.findIndex(f => f.userId === uid);
-  if (pos >= 0) return interaction.reply({ content: `⏳ Você já está na fila (posição **${pos + 1}**). Aguarde aqui na call.`, ...eph });
+  if (pos >= 0) return interaction.reply(aviso(E.relogio, `Você já está na fila (posição ${pos + 1})`, 'Aguarde aqui na call.'));
 
-  await interaction.deferReply(eph);
+  await interaction.deferReply({ flags: EPH_V2 });
   cfg.fila.push({ userId: uid, em: Date.now() });
   saveCfg(guild.id, cfg);
 
-  // DM pra todos os atendentes
+  // 1) AVISO NO CHAT DA CALL marcando os cargos de atendentes (garante que alguém veja, mesmo com DM fechada)
+  let marcou = false;
+  try {
+    const canal = guild.channels.cache.get(cfg.canalId) || await guild.channels.fetch(cfg.canalId);
+    const c = new ContainerBuilder().setAccentColor(COR)
+      .addTextDisplayComponents(txt(`${E.sino}  **Novo pedido de atendimento por voz**`))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(`${E.user}  ${interaction.user} está esperando nesta call.\n${E.cargo}  ${cfg.cargosSuporte.map(r => `<@&${r}>`).join(' ')}`))
+      .addSeparatorComponents(sep())
+      .addActionRowComponents(new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId('vsup_painel').setLabel('Painel Atendente').setEmoji(E.painel).setStyle(ButtonStyle.Primary)));
+    await canal.send({ components: [c], flags: MessageFlags.IsComponentsV2, allowedMentions: { roles: cfg.cargosSuporte, users: [uid] } });
+    marcou = true;
+  } catch (e) { console.error('[SuporteVoz] Erro ao avisar no chat da call:', e.message); }
+
+  // 2) DM pra todos os atendentes
   let avisados = 0;
   try {
-    await guild.members.fetch();
+    await Promise.race([guild.members.fetch(), sleep(8000)]).catch(() => {});   // se demorar, usa o cache
     const atendentes = guild.members.cache.filter(m => !m.user.bot && cfg.cargosSuporte.some(r => m.roles.cache.has(r)));
-    const embed = new EmbedBuilder().setColor(0xFFFFFF).setTitle('🔔 Novo pedido de atendimento por voz')
-      .setDescription(`${interaction.user} está esperando na call <#${cfg.canalId}> em **${guild.name}**.\nToque em **Painel Atendente** para atender.`);
-    const row = new ActionRowBuilder().addComponents(
-      new ButtonBuilder().setCustomId(`vsup_painel:${guild.id}`).setLabel('Painel Atendente').setEmoji('🛠️').setStyle(ButtonStyle.Primary));
+    const dm = new ContainerBuilder().setAccentColor(COR)
+      .addTextDisplayComponents(txt(`${E.sino}  **Novo pedido de atendimento por voz**`))
+      .addSeparatorComponents(sep())
+      .addTextDisplayComponents(txt(`${E.user}  ${interaction.user} está esperando na call <#${cfg.canalId}> em **${guild.name}**.\n${E.painel}  Toque em **Painel Atendente** para atender.`))
+      .addSeparatorComponents(sep())
+      .addActionRowComponents(new ActionRowBuilder().addComponents(
+        new ButtonBuilder().setCustomId(`vsup_painel:${guild.id}`).setLabel('Painel Atendente').setEmoji(E.painel).setStyle(ButtonStyle.Primary)));
     for (const m of atendentes.values()) {
-      try { await m.send({ embeds: [embed], components: [row] }); avisados++; } catch { /* DM fechada */ }
+      try { await m.send({ components: [dm], flags: MessageFlags.IsComponentsV2 }); avisados++; }
+      catch (e) { console.warn(`[SuporteVoz] DM não enviada para ${m.user.tag}: ${e.message}`); }
       await sleep(250);
     }
-  } catch (e) { console.error('[SuporteVoz] Erro ao avisar atendentes:', e.message); }
+  } catch (e) { console.error('[SuporteVoz] Erro ao avisar atendentes por DM:', e.message); }
 
-  return interaction.editReply({ content: avisados
-    ? `✅ Pedido enviado! **${avisados}** atendente(s) foram avisados. Aguarde aqui na call: sua fala será liberada quando alguém te atender.`
-    : '✅ Você entrou na fila, mas nenhum atendente pôde ser avisado por DM. Aguarde na call; os atendentes também veem a fila no **Painel Atendente**.' });
+  const detalhe = [
+    marcou ? `${E.ok}  Atendentes marcados no chat da call.` : `${E.erro}  Não consegui marcar os atendentes no chat da call.`,
+    avisados ? `${E.ok}  **${avisados}** atendente(s) avisados por DM.` : `${E.erro}  Nenhuma DM enviada (DMs fechadas?). Eles também veem a fila no **Painel Atendente**.`,
+  ].join('\n');
+  return interaction.editReply(aviso(E.ok, 'Pedido enviado!', `${detalhe}\n\n${E.relogio}  Aguarde aqui na call: sua fala será liberada quando alguém te atender.`));
 }
 
 async function sairDaFila(interaction) {
@@ -218,8 +279,9 @@ async function sairDaFila(interaction) {
   const cfg = getCfg(guild.id);
   const antes = cfg.fila.length;
   cfg.fila = cfg.fila.filter(f => f.userId !== interaction.user.id);
-  if (cfg.fila.length !== antes) saveCfg(guild.id, cfg);
-  return interaction.reply({ content: cfg.fila.length !== antes ? '↩️ Você saiu da fila.' : 'Você não está na fila.', flags: MessageFlags.Ephemeral });
+  const saiu = cfg.fila.length !== antes;
+  if (saiu) saveCfg(guild.id, cfg);
+  return interaction.reply(saiu ? aviso(E.voltar, 'Você saiu da fila') : aviso(E.erro, 'Você não está na fila'));
 }
 
 // ───────────────────────────── 4) painel do atendente ─────────────────────────────
@@ -228,42 +290,43 @@ function buildPainelAtendente(guild, aba = 'fila', interaction) {
   const fila = cfg.fila;
   const atend = Object.entries(cfg.atendimentos);
   const c = new ContainerBuilder().setAccentColor(COR)
-    .addTextDisplayComponents(txt(`## 🛠️ Painel Atendente\n**Na fila:** ${fila.length} • **Em atendimento:** ${atend.length}`));
+    .addTextDisplayComponents(txt(`## ${E.painel}  Painel Atendente\n${E.relogio}  **Na fila:** ${fila.length}  •  ${E.voz}  **Em atendimento:** ${atend.length}`));
   c.addSeparatorComponents(sep());
 
   if (aba === 'fila') {
-    if (!fila.length) c.addTextDisplayComponents(txt('_Ninguém esperando atendimento no momento._'));
+    if (!fila.length) c.addTextDisplayComponents(txt(`${E.ok}  _Ninguém esperando atendimento no momento._`));
     fila.slice(0, POR_PAGINA).forEach((f, i) => {
-      c.addTextDisplayComponents(txt(`**${i + 1}.** <@${f.userId}> • esperando desde <t:${Math.floor(f.em / 1000)}:R>`));
+      c.addTextDisplayComponents(txt(`**${i + 1}.** ${E.user} <@${f.userId}> • esperando desde <t:${Math.floor(f.em / 1000)}:R>`));
       c.addActionRowComponents(new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`vsup_atender:${guild.id}:${f.userId}`).setLabel('Atender').setEmoji('🎧').setStyle(ButtonStyle.Success)));
+        new ButtonBuilder().setCustomId(`vsup_atender:${guild.id}:${f.userId}`).setLabel('Atender').setEmoji(E.voz).setStyle(ButtonStyle.Success)));
     });
     if (fila.length > POR_PAGINA) c.addTextDisplayComponents(txt(`-# +${fila.length - POR_PAGINA} na fila (atenda os primeiros para ver os próximos)`));
   } else {
-    if (!atend.length) c.addTextDisplayComponents(txt('_Nenhum atendimento em andamento._'));
+    if (!atend.length) c.addTextDisplayComponents(txt(`${E.ok}  _Nenhum atendimento em andamento._`));
     atend.slice(0, POR_PAGINA).forEach(([uid, a]) => {
-      c.addTextDisplayComponents(txt(`<@${uid}> • atendido por <@${a.atendenteId}> desde <t:${Math.floor(a.em / 1000)}:R>`));
+      c.addTextDisplayComponents(txt(`${E.user} <@${uid}> • atendido por <@${a.atendenteId}> desde <t:${Math.floor(a.em / 1000)}:R>`));
       c.addActionRowComponents(new ActionRowBuilder().addComponents(
-        new ButtonBuilder().setCustomId(`vsup_fim:${guild.id}:${uid}`).setLabel('Finalizar atendimento').setEmoji('✅').setStyle(ButtonStyle.Danger)));
+        new ButtonBuilder().setCustomId(`vsup_fim:${guild.id}:${uid}`).setLabel('Finalizar atendimento').setEmoji(E.ok).setStyle(ButtonStyle.Danger)));
     });
     if (atend.length > POR_PAGINA) c.addTextDisplayComponents(txt(`-# +${atend.length - POR_PAGINA} em atendimento`));
   }
 
+  c.addSeparatorComponents(sep());
   c.addActionRowComponents(new ActionRowBuilder().addComponents(
     new ButtonBuilder().setCustomId(`vsup_pfila:${guild.id}`).setLabel(`Fila (${fila.length})`).setStyle(aba === 'fila' ? ButtonStyle.Primary : ButtonStyle.Secondary),
     new ButtonBuilder().setCustomId(`vsup_patend:${guild.id}`).setLabel(`Em atendimento (${atend.length})`).setStyle(aba === 'atend' ? ButtonStyle.Primary : ButtonStyle.Secondary),
-    new ButtonBuilder().setCustomId(`vsup_pupd:${guild.id}:${aba}`).setLabel('Atualizar').setEmoji('🔄').setStyle(ButtonStyle.Secondary),
+    new ButtonBuilder().setCustomId(`vsup_pupd:${guild.id}:${aba}`).setLabel('Atualizar').setEmoji(E.raio).setStyle(ButtonStyle.Secondary),
   ));
   return { components: [c], flags: interaction ? flagsPainel(interaction) : EPH_V2 };
 }
 
 async function abrirPainelAtendente(interaction, gid) {
   const { guild, member } = await contexto(interaction, gid);
-  if (!guild) return interaction.reply({ content: '❌ Não encontrei o servidor.', flags: MessageFlags.Ephemeral });
+  if (!guild) return interaction.reply(aviso(E.erro, 'Não encontrei o servidor'));
   const cfg = getCfg(guild.id);
-  if (!cfg.ativo) return interaction.reply({ content: '❌ O suporte por voz está desativado.', flags: emDM(interaction) ? undefined : MessageFlags.Ephemeral });
+  if (!cfg.ativo) return interaction.reply(avisoI(interaction, E.erro, 'Suporte por voz desativado'));
   if (!ehAtendente(member, cfg, interaction.user.id)) {
-    return interaction.reply({ content: '❌ Só atendentes podem abrir este painel.', flags: emDM(interaction) ? undefined : MessageFlags.Ephemeral });
+    return interaction.reply(avisoI(interaction, E.erro, 'Só atendentes podem abrir este painel'));
   }
   return interaction.reply(buildPainelAtendente(guild, 'fila', interaction));
 }
@@ -271,7 +334,7 @@ async function abrirPainelAtendente(interaction, gid) {
 async function trocarAba(interaction, gid, aba) {
   const { guild, member } = await contexto(interaction, gid);
   if (!guild) return;
-  if (!ehAtendente(member, getCfg(guild.id), interaction.user.id)) return interaction.reply({ content: '❌ Só atendentes.', flags: MessageFlags.Ephemeral });
+  if (!ehAtendente(member, getCfg(guild.id), interaction.user.id)) return interaction.reply(aviso(E.erro, 'Só atendentes'));
   return interaction.update(buildPainelAtendente(guild, aba, interaction));
 }
 
@@ -279,7 +342,7 @@ async function atender(interaction, gid, uid) {
   const { guild, member } = await contexto(interaction, gid);
   if (!guild) return;
   const cfg = getCfg(guild.id);
-  if (!ehAtendente(member, cfg, interaction.user.id)) return interaction.reply({ content: '❌ Só atendentes.', flags: MessageFlags.Ephemeral });
+  if (!ehAtendente(member, cfg, interaction.user.id)) return interaction.reply(aviso(E.erro, 'Só atendentes'));
 
   const naFila = cfg.fila.find(f => f.userId === uid);
   if (!naFila) return interaction.update(buildPainelAtendente(guild, 'fila', interaction)); // já atendido por outro ou saiu
@@ -295,12 +358,12 @@ async function atender(interaction, gid, uid) {
   } catch (e) {
     cfg.fila.unshift(naFila); saveCfg(guild.id, cfg);
     console.error('[SuporteVoz] Erro ao dar o cargo de atendimento:', e.message);
-    return interaction.reply({ content: `❌ Não consegui dar o cargo de atendimento: ${e.message}\nO cargo do Kael precisa estar **acima** do cargo "em atendimento".`, flags: emDM(interaction) ? undefined : MessageFlags.Ephemeral });
+    return interaction.reply(avisoI(interaction, E.erro, 'Não consegui dar o cargo de atendimento', `${e.message}\nO cargo do Kael precisa estar **acima** do cargo "em atendimento".`));
   }
   cfg.atendimentos[uid] = { atendenteId: interaction.user.id, em: Date.now() };
   saveCfg(guild.id, cfg);
   const canal = guild.channels.cache.get(cfg.canalId);
-  if (canal) canal.send({ content: `🎧 ${alvo}, você está sendo atendido por ${interaction.user}! Sua fala foi **liberada**.`, allowedMentions: { users: [uid, interaction.user.id] } }).catch(() => {});
+  if (canal) canal.send({ ...avisoCanal(E.voz, 'Atendimento iniciado', `${E.user}  ${alvo}, você está sendo atendido por ${interaction.user}!\n${E.ok}  Sua fala foi **liberada**.`), allowedMentions: { users: [uid, interaction.user.id] } }).catch(() => {});
   return interaction.update(buildPainelAtendente(guild, 'fila', interaction));
 }
 
@@ -308,10 +371,10 @@ async function finalizar(interaction, gid, uid) {
   const { guild, member } = await contexto(interaction, gid);
   if (!guild) return;
   const cfg = getCfg(guild.id);
-  if (!ehAtendente(member, cfg, interaction.user.id)) return interaction.reply({ content: '❌ Só atendentes.', flags: MessageFlags.Ephemeral });
+  if (!ehAtendente(member, cfg, interaction.user.id)) return interaction.reply(aviso(E.erro, 'Só atendentes'));
   await encerrar(guild, cfg, uid, `Atendimento finalizado por ${interaction.user.tag}`);
   const canal = guild.channels.cache.get(cfg.canalId);
-  if (canal) canal.send({ content: `✅ Atendimento de <@${uid}> finalizado por ${interaction.user}. A fala dele(a) foi bloqueada novamente.`, allowedMentions: { parse: [] } }).catch(() => {});
+  if (canal) canal.send({ ...avisoCanal(E.ok, 'Atendimento finalizado', `${E.user}  <@${uid}> foi atendido por ${interaction.user}.\n${E.parar}  A fala dele(a) foi bloqueada novamente.`), allowedMentions: { parse: [] } }).catch(() => {});
   return interaction.update(buildPainelAtendente(guild, 'atend', interaction));
 }
 
@@ -341,7 +404,7 @@ async function onVoiceStateUpdate(oldState, newState) {
       if (cfg.atendimentos[uid]) {
         await encerrar(guild, cfg, uid, 'Saiu da call de suporte');
         const canal = guild.channels.cache.get(cfg.canalId);
-        if (canal) canal.send({ content: `👋 <@${uid}> saiu da call — atendimento encerrado.`, allowedMentions: { parse: [] } }).catch(() => {});
+        if (canal) canal.send({ ...avisoCanal(E.voltar, 'Atendimento encerrado', `${E.user}  <@${uid}> saiu da call.`), allowedMentions: { parse: [] } }).catch(() => {});
       }
     }
     // entrou na call com o cargo de atendimento sobrando (ex.: bot caiu no meio do atendimento): limpa
@@ -361,7 +424,7 @@ async function handle(interaction) {
   // — configuração (só admin) —
   if (id.startsWith('vsup_go_') || id.startsWith('vsup_cfg_')) {
     if (!ehAdmin(interaction.member, interaction.user.id)) {
-      return interaction.reply({ content: '❌ Só administradores podem configurar.', flags: MessageFlags.Ephemeral });
+      return interaction.reply(aviso(E.erro, 'Só administradores podem configurar'));
     }
     if (id === 'vsup_go_chat') return require('../ticket-system/ticketManager').showAdminPanel(interaction);
     if (id === 'vsup_go_voz') return interaction.update(buildConfigPayload(interaction.guild));
