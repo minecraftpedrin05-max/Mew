@@ -52,6 +52,7 @@ backup_*/
 # Env / credentials
 .env
 .env.*
+!.env.example
 
 # Dados sensíveis do bot (clientes, licenças, chaves) — nunca versionar
 database/database.json

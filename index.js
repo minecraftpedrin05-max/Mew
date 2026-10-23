@@ -1,3 +1,4 @@
+require('./utils/carregarEnv'); // lê o .env (se existir) antes de qualquer outro módulo
 const { Client, GatewayIntentBits, REST, Routes, Collection } = require("discord.js");
 const fs   = require("fs");
 const path = require("path");
@@ -42,7 +43,7 @@ const { BOT_OWNER_ID } = require('./config/constants');
 // Registra os comandos de barra no Discord e DIZ no log exatamente o que aconteceu.
 // Se UM comando estiver inválido o Discord recusa o lote inteiro (e ficam só os
 // comandos antigos). Nesse caso registramos um por um pra isolar o culpado.
-async function sincronizarComandos(rest, commandsJSON) {
+async function sincronizarComandos(rest, commandsJSON, client) {
   client.errosRegistro = [];
   const nomes = commandsJSON.map(c => c.name);
   console.log(`[Comandos] Carregados ${nomes.length}: ${nomes.join(', ')}`);
@@ -142,7 +143,7 @@ client.once("ready", async () => {
 
   try {
     const rest = new REST({ version: "10" }).setToken(TOKEN);
-    await sincronizarComandos(rest, commandsJSON);
+    await sincronizarComandos(rest, commandsJSON, client);
     if (client.errosRegistro?.length) {   // avisa o dono por DM quando algum comando for recusado
       const txt = client.errosRegistro.map(e => `• /${e.nome}: ${e.msg}`).join('\n').slice(0, 1800);
       client.users.fetch(BOT_OWNER_ID).then(u => u.send(`⚠️ O Discord recusou comando(s) ao iniciar:\n${txt}`)).catch(() => {});

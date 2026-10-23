@@ -18,7 +18,8 @@
 const fs = require('fs');
 const path = require('path');
 
-const DATA_DIR = process.env.RAILWAY_VOLUME_MOUNT_PATH || __dirname;
+// DATA_DIR: pasta dos bancos em outro servidor/VPS (opcional). Na Railway vale o Volume.
+const DATA_DIR = process.env.DATA_DIR || process.env.RAILWAY_VOLUME_MOUNT_PATH || __dirname;
 
 if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });

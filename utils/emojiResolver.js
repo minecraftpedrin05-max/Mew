@@ -133,7 +133,7 @@ function reescrever(v, plain = true, chave = '') {
     if (ehObjetoEmoji(v)) {
       const r = resolverUm(!!v.animated, v.name, v.id);
       if (r === null) return v;
-      if (r === false) return { name: FALLBACK[v.name] || '▫️' };   // emoji unicode de botão/select
+      if (r === false) return FALLBACK[v.name] ? { name: FALLBACK[v.name] } : v;   // sem alternativa conhecida: deixa como está
       return { id: r.id, name: v.name, animated: r.animated };
     }
     // Botões e menus (type 2/3/...) e opções de select: o Discord não desenha emoji custom no texto deles
@@ -152,18 +152,44 @@ function reescrever(v, plain = true, chave = '') {
   return v;
 }
 
+/** Remove a chave `emoji` (objeto) de botões, menus e opções — usado só na rede de segurança. */
+function tirarEmojisDeComponentes(v) {
+  if (Array.isArray(v)) return v.map(tirarEmojisDeComponentes);
+  if (v && typeof v === 'object') {
+    const proto = Object.getPrototypeOf(v);
+    if (proto !== Object.prototype && proto !== null) return v;
+    const out = {};
+    for (const k of Object.keys(v)) {
+      if (k === 'emoji' && v[k] && typeof v[k] === 'object') continue;
+      out[k] = tirarEmojisDeComponentes(v[k]);
+    }
+    return out;
+  }
+  return v;
+}
+
 /** Instala o filtro em TODAS as requisições que o discord.js faz ao Discord. */
 function instalar(client) {
   const rest = client.rest;
   if (!rest || rest.__kaelEmoji) return;
   const original = rest.request.bind(rest);
-  rest.request = (options) => {
+  rest.request = async (options) => {
     try {
       if (options && options.body && typeof options.body === 'object') {
         options = { ...options, body: reescrever(options.body) };
       }
     } catch (e) { console.error('[Emojis] Falha ao reescrever emojis:', e.message); }
-    return original(options);
+    try {
+      return await original(options);
+    } catch (e) {
+      // Rede de segurança: se o Discord recusar algum emoji de botão/menu, reenvia sem os emojis dos componentes
+      const txt = e && (e.message || '') + JSON.stringify((e && e.rawError) || {});
+      if (e && e.code === 50035 && /INVALID_EMOJI/.test(txt) && options && options.body && !options.__semEmoji) {
+        console.warn('[Emojis] Emoji inválido em componente — reenviando sem os emojis dos botões/menus.');
+        return original({ ...options, body: tirarEmojisDeComponentes(options.body), __semEmoji: true });
+      }
+      throw e;
+    }
   };
   rest.__kaelEmoji = true;
 }
