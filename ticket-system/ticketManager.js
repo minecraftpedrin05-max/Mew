@@ -35,6 +35,10 @@ const {
   RESTJSONErrorCodes,
 } = require('discord.js');
 
+const { adicionarTexto, dividirTexto } = require('../utils/separador');
+const { validarUrlImagem } = require('../utils/validarImagem');
+const emojiResolver = require('../utils/emojiResolver');
+
 let db;
 try {
   db = require('../database/db');
@@ -237,6 +241,11 @@ function emojiValido(raw) {
   const valor = (raw || '').trim();
   if (!valor) return '<:config3:1524208114327617588>';
   if (/^<a?:\w{2,32}:\d{15,25}>$/.test(valor)) return valor;
+  // atalho :nome: (ou só o nome) → emoji do aplicativo com esse nome
+  const atalho = emojiResolver.resolverAtalho(valor);
+  if (atalho) return atalho;
+  // texto comum (ex.: ":algo:" que não existe) NÃO é emoji: o Discord recusaria a mensagem inteira
+  if (/^:?[A-Za-z0-9_]+:?$/.test(valor)) return '<:config3:1524208114327617588>';
   if (valor.length <= 8) return valor; // emoji unicode simples (ou combinado)
   return '<:config3:1524208114327617588>';
 }
@@ -247,9 +256,7 @@ function emojiValido(raw) {
  */
 function aplicarBloco(container, bloco) {
   if (bloco.tipo === 'texto') {
-    container.addTextDisplayComponents(
-      new TextDisplayBuilder().setContent(bloco.conteudo)
-    );
+    adicionarTexto(container, bloco.conteudo);   // {separador} vira linha divisória de verdade
   } else if (bloco.tipo === 'divisor') {
     container.addSeparatorComponents(
       new SeparatorBuilder().setDivider(true).setSpacing(1)
@@ -307,19 +314,22 @@ function buildPreviewContainer(cfg, guild) {
   // E descrição precisam estar na MESMA Section pra ficarem visualmente
   // juntos ao lado da miniatura — antes a descrição era um bloco separado
   // fora da Section e "escapava" pra fora da área da imagem.
+  const partesDesc = dividirTexto(descricao);
   if (cfg.thumbnailUrl) {
+    // A Section só aceita texto: título + 1º trecho da descrição ficam ao lado da miniatura;
+    // o que vier depois de um {separador} continua logo abaixo.
+    const primeiro = partesDesc[0] && partesDesc[0].tipo === 'texto' ? partesDesc.shift().conteudo : null;
+    const textos = [new TextDisplayBuilder().setContent(`<:config3:1524208114327617588>  **${titulo}**`)];
+    if (primeiro) textos.push(new TextDisplayBuilder().setContent(primeiro));
     container.addSectionComponents(
       new SectionBuilder()
-        .addTextDisplayComponents(
-          new TextDisplayBuilder().setContent(`<:config3:1524208114327617588>  **${titulo}**`),
-          new TextDisplayBuilder().setContent(descricao),
-        )
+        .addTextDisplayComponents(...textos)
         .setThumbnailAccessory(new ThumbnailBuilder().setURL(cfg.thumbnailUrl))
     );
   } else {
     container.addTextDisplayComponents(new TextDisplayBuilder().setContent(`<:config3:1524208114327617588>  **${titulo}**`));
-    container.addTextDisplayComponents(new TextDisplayBuilder().setContent(descricao));
   }
+  adicionarTexto(container, partesDesc.map(p => (p.tipo === 'sep' ? '{separador}' : p.conteudo)).join('\n'));
 
   for (const bloco of blocos.filter(b => b.posicao !== 'depois')) {
     aplicarBloco(container, bloco);
@@ -901,7 +911,7 @@ async function modalAdicionarVariante(interaction) {
   const modal = new ModalBuilder().setCustomId('tkt_modal_variante_add').setTitle('Adicionar Variante');
   modal.addComponents(
     new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_nome') .setLabel('Nome').setStyle(TextInputStyle.Short).setPlaceholder('Ex: Suporte, Parceria...').setRequired(true).setMaxLength(50)),
-    new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_emoji').setLabel('Emoji').setStyle(TextInputStyle.Short).setPlaceholder('Ex: <:config3:1524208114327617588> 💰 🤝').setRequired(false).setMaxLength(100)),
+    new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_emoji').setLabel('Emoji').setStyle(TextInputStyle.Short).setPlaceholder('Ex: :coroa: ou 💰 ou <:config3:1524208114327617588>').setRequired(false).setMaxLength(100)),
     new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_desc') .setLabel('Descrição').setStyle(TextInputStyle.Short).setPlaceholder('Aparece no botão').setRequired(false).setMaxLength(100)),
   );
   await interaction.showModal(modal);
@@ -912,7 +922,7 @@ async function modalEditarVariante(interaction) {
   modal.addComponents(
     new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_nome_ant') .setLabel('Nome atual').setStyle(TextInputStyle.Short).setRequired(true).setMaxLength(50)),
     new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_nome_novo').setLabel('Novo nome (vazio = manter)').setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(50)),
-    new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_emoji_ed') .setLabel('Novo emoji (vazio = manter)').setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(100)),
+    new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_emoji_ed') .setLabel('Novo emoji (vazio = manter)').setStyle(TextInputStyle.Short).setPlaceholder('Ex: :coroa: ou 💰').setRequired(false).setMaxLength(100)),
     new ActionRowBuilder().addComponents(new TextInputBuilder().setCustomId('tkt_var_desc_ed')  .setLabel('Nova descrição (vazio = manter)').setStyle(TextInputStyle.Short).setRequired(false).setMaxLength(100)),
   );
   await interaction.showModal(modal);
@@ -1628,6 +1638,8 @@ async function handleModal(interaction) {
   }
 
   if (id === 'tkt_modal_layout_midia') {
+    const checagem = await validarUrlImagem(interaction.fields.getTextInputValue('tkt_layout_url'));
+    if (!checagem.ok) return interaction.reply({ content: `❌ Imagem não adicionada. ${checagem.motivo}`, flags: MessageFlags.Ephemeral });
     const posicao = interaction.fields.getTextInputValue('tkt_layout_posicao').trim().toLowerCase() === 'depois' ? 'depois' : 'antes';
     const cfg     = getConfig(interaction.guildId);
     const blocos  = cfg.layoutBlocos || [];
@@ -1694,6 +1706,10 @@ async function handleModal(interaction) {
 
   if (id === 'tkt_modal_layout_thumb') {
     const url = interaction.fields.getTextInputValue('tkt_layout_thumb_url').trim();
+    if (url) {
+      const checagem = await validarUrlImagem(url);
+      if (!checagem.ok) return interaction.reply({ content: `❌ Thumbnail não alterada. ${checagem.motivo}`, flags: MessageFlags.Ephemeral });
+    }
     saveConfig(interaction.guildId, { thumbnailUrl: url || null });
     await atualizarPainelMsg(interaction.guildId, interaction.guild);
     // Atualiza a MESMA mensagem efêmera do editor (update), em vez de

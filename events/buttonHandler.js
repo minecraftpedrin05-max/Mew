@@ -344,6 +344,9 @@ module.exports = {
       if (interaction.isModalSubmit())  return salesManager.handleModal(interaction);
     }
 
+    // ── SUPORTE POR VOZ (botões, menus de canal/cargo e DMs dos atendentes) ──
+    if (customId?.startsWith('vsup_')) return require('../voice-support/voiceSupportManager').handle(interaction);
+
     if (!interaction.isButton()) return;
 
     // ── PAINEL DE BOTÕES ADM / INTERFACE ──
@@ -380,7 +383,7 @@ module.exports = {
     if (customId === 'painel_vendas')      return produtoHandler.enviarMenuPrincipal(interaction);
     if (customId === 'painel_ticket') {
       if (await bloqueadoPorPlano("BASICO", "Gerenciar Ticket")) return;
-      return ticketManager.showAdminPanel(interaction);
+      return require('../voice-support/voiceSupportManager').showEscolha(interaction); // escolher: ticket (chat) ou suporte por voz
     }
 
     // ── RENDIMENTOS ──

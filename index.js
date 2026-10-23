@@ -79,6 +79,7 @@ async function bootstrap() {
     GatewayIntentBits.GuildMembers,
     GatewayIntentBits.GuildPresences,
     GatewayIntentBits.GuildInvites,
+    GatewayIntentBits.GuildVoiceStates,
   ]
 });
 
@@ -225,6 +226,11 @@ client.once("ready", async () => {
   // a cada entrada de membro.
   require('./invite-system/inviteTracker').primeAllGuilds(client)
     .catch(e => console.error('[InviteSystem] Erro ao inicializar cache de convites:', e));
+});
+
+// Suporte por voz: limpa fila/atendimento de quem sai da call
+client.on("voiceStateUpdate", (oldState, newState) => {
+  require('./voice-support/voiceSupportManager').onVoiceStateUpdate(oldState, newState);
 });
 
 client.on("interactionCreate", async (interaction) => {

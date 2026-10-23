@@ -21,7 +21,7 @@
 
 // 1) <:nome:id> / <a:nome:id> (formato do Discord)   2) :nome: solto
 const RE_EMOJI = /<(a?):([A-Za-z0-9_]{2,32}):(\d{15,22})>|(?<![A-Za-z0-9_\/<:]):([A-Za-z0-9_]{2,32}):(?![0-9A-Za-z_]*\d{15,22}>)/g;
-const RE_SEPARADOR_LINHA = /^[ \t]*\{separador\}[ \t]*$/i;
+const RE_SEPARADOR_LINHA = /^[ \t\r]*\{separador\}[ \t\r]*$/i;
 const BARRA = '▬▬▬▬▬▬▬▬▬▬▬▬▬▬';
 // campos onde o Discord NÃO desenha emoji personalizado (ou que são dados): não trocar :nome: aí
 const CHAVES_SEM_PLAIN = new Set(['custom_id', 'value', 'url', 'filename', 'id', 'proxy_url', 'label', 'placeholder']);
@@ -202,6 +202,13 @@ function relatorio() {
 }
 
 function listar() { return [...porNome.entries()].map(([nome, e]) => ({ nome, id: e.id, animated: e.animated })); }
+/** ":nome:" (ou "nome") → "<:nome:id>" se existir um emoji do aplicativo com esse nome; senão null. */
+function resolverAtalho(texto) {
+  const m = /^:?([A-Za-z0-9_]{2,32}):?$/.exec(String(texto || '').trim());
+  if (!m) return null;
+  const e = porNome.get(m[1].toLowerCase());
+  return e ? `<${e.animated ? 'a' : ''}:${m[1]}:${e.id}>` : null;
+}
 function existe(nome) { return porNome.has(String(nome).toLowerCase()); }
 
-module.exports = { instalar, carregar, relatorio, reescrever, listar, existe, FALLBACK };
+module.exports = { instalar, carregar, relatorio, reescrever, listar, existe, resolverAtalho, FALLBACK };
