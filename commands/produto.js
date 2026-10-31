@@ -244,9 +244,22 @@ async function removerEmojiAppSeExistir(client, valorAntigo) {
 // sempre o tamanho do array `produto.estoque` (itens colados no
 // modal "Adicionar Estoque"). Quando tem variante, usa o campo
 // numérico `variante.estoque` (null = ilimitado).
+//
+// ESTOQUE INFINITO: quando `produto.estoqueInfinito === true`, o produto
+// (e todas as suas variantes) nunca esgota e a entrega NÃO consome itens.
+// Nesse modo os helpers devolvem `null` (= ilimitado, exibido como ∞).
+function estoqueEhInfinito(produto) {
+  return produto?.estoqueInfinito === true;
+}
 function getEstoqueProdutoSemVariante(produto) {
+  if (estoqueEhInfinito(produto)) return null;
   const arr = produto?.estoque || [];
   return arr.length;
+}
+// Estoque efetivo de uma variante (null = ilimitado).
+function getEstoqueVarianteEfetivo(produto, variante) {
+  if (estoqueEhInfinito(produto)) return null;
+  return variante?.estoque ?? null;
 }
 function textoEstoque(qtd) {
   return qtd === null || qtd === undefined ? '∞' : `${qtd}`;
@@ -337,7 +350,7 @@ function buildPainelEmbed(guildId, guild, produtoId) {
   const loja = db.getGuild(guildId)?.loja || {};
   const variantes = p.variantes || [];
   const temVariantes = variantes.length > 0;
-  const estoqueTxt = temVariantes ? `${variantes.length} variante(s)` : `${getEstoqueProdutoSemVariante(p)} item(ns)`;
+  const estoqueTxt = estoqueEhInfinito(p) ? '∞ Infinito' : (temVariantes ? `${variantes.length} variante(s)` : `${getEstoqueProdutoSemVariante(p)} item(ns)`);
   const vendas = loja.vendas || 0;
   const cargoTexto = p.cargoId ? `<@&${p.cargoId}>` : '`Não configurado`';
   // Painel de config agora usa a mesma "Cor da Embed" do produto (se
@@ -525,6 +538,10 @@ function buildAvancadoEmbed(guildId, guild, produtoId) {
         assinatura.ativa
           ? `<:positivo:1528401238197276702> Ativa — \`${assinatura.duracaoDias || 30} dias\`${assinatura.vipAtivado ? ' • VIP habilitado' : ''}`
           : '<:negativo:1528400986744295475> Desativada (produto avulso)', inline: true },
+      { name: '♾️ Estoque Infinito', value:
+        p.estoqueInfinito === true
+          ? '<:positivo:1528401238197276702> Ativo — nunca esgota e a entrega não consome os itens cadastrados'
+          : '<:negativo:1528400986744295475> Desativado (estoque normal)', inline: false },
     )
     .setFooter(footerLoja(guild));
 }
@@ -543,6 +560,9 @@ function buildAvancadoComponents(produtoId) {
     new ActionRowBuilder().addComponents(
       new ButtonBuilder().setCustomId(`prod_toggle_assinatura_${produtoId}`).setLabel('Ativar/Desativar Assinatura').setEmoji('🔁').setStyle(ButtonStyle.Primary),
       new ButtonBuilder().setCustomId(`prod_modal_assinatura_${produtoId}`).setLabel('Config. Assinatura').setEmoji('<:config3:1524208114327617588>').setStyle(ButtonStyle.Secondary),
+    ),
+    new ActionRowBuilder().addComponents(
+      new ButtonBuilder().setCustomId(`prod_toggle_estoqueinf_${produtoId}`).setLabel('Ativar/Desativar Estoque Infinito').setEmoji('♾️').setStyle(ButtonStyle.Primary),
       new ButtonBuilder().setCustomId(`prod_voltar_painel_produto_${produtoId}`).setLabel('Voltar').setEmoji({ name: 'voltar', id: '1528548726518448198' }).setStyle(ButtonStyle.Secondary),
     ),
   ];
@@ -674,7 +694,7 @@ function buildVitrineEmbed(produto, guild) {
       : `\`R$${precoFmt}\``;
     embed.addFields(
       { name: 'Valor à vista', value: valorTxt, inline: true },
-      { name: 'Restam', value: `\`${restam}\``, inline: true }
+      { name: 'Restam', value: `\`${textoEstoque(restam)}\``, inline: true }
     );
   }
   // BUGFIX: quando o produto TEM variantes, não injeta mais nenhum campo
@@ -702,8 +722,9 @@ function buildVitrineComponentes(produto, produtoId) {
   if (possuiVariantes) {
     const optionsMenu = variantes.slice(0, 25).map(v => {
       const precoFormatado = formatarPrecoVariante(v.preco);
-      const qtd = v.estoque ?? 0;
-      const estoqueTxt = qtd > 0 ? `${qtd}` : 'ESGOTADO';
+      const infinito = estoqueEhInfinito(produto);
+      const qtd = infinito ? Infinity : (v.estoque ?? 0);
+      const estoqueTxt = infinito ? '∞' : (qtd > 0 ? `${qtd}` : 'ESGOTADO');
       return {
         label: (qtd > 0 ? v.nome : `${v.nome} (Esgotado)`).slice(0, 100),
         value: `compra_var_${v.id || v.nome.toLowerCase().replace(/\s/g, '_')}`,
@@ -948,7 +969,7 @@ async function criarCanalCompraEMostrarRevisao(interaction, { varianteKey, nomeI
   if (!produtoTemVariantes && produtoDoPedido) {
     estoqueTexto = textoEstoque(getEstoqueProdutoSemVariante(produtoDoPedido));
   } else {
-    estoqueTexto = textoEstoque(varianteReal.estoque);
+    estoqueTexto = textoEstoque(getEstoqueVarianteEfetivo(produtoDoPedido, varianteReal));
   }
 
   metadadosPedido[canal.id] = { nomeItem, varianteNome: varianteNome || nomeItem, numeroPedido, dataCriacao, produtoId: produtoId || null };
@@ -1009,7 +1030,7 @@ async function voltarParaRevisao(interaction) {
   if (!produtoTemVariantes && produtoDoPedido) {
     estoqueTexto = textoEstoque(getEstoqueProdutoSemVariante(produtoDoPedido));
   } else {
-    estoqueTexto = textoEstoque(variante.estoque);
+    estoqueTexto = textoEstoque(getEstoqueVarianteEfetivo(produtoDoPedido, variante));
   }
 
   const embedRevisao = buildRevisaoEmbedPropria({
@@ -1414,7 +1435,7 @@ async function atualizarEmbedRevisao(interaction) {
   if (!produtoTemVariantes && produtoDoPedido) {
     estoqueTexto = textoEstoque(getEstoqueProdutoSemVariante(produtoDoPedido));
   } else {
-    estoqueTexto = textoEstoque(variante.estoque);
+    estoqueTexto = textoEstoque(getEstoqueVarianteEfetivo(produtoDoPedido, variante));
   }
 
   const embedRevisao = buildRevisaoEmbedPropria({
@@ -1453,7 +1474,7 @@ async function processarModalQtdPropria(interaction) {
     const produtoTemVariantes = produtoDoPedido && (produtoDoPedido.variantes || []).length > 0;
     const limiteEstoque = !produtoTemVariantes && produtoDoPedido
       ? getEstoqueProdutoSemVariante(produtoDoPedido)
-      : (variante?.estoque ?? null);
+      : getEstoqueVarianteEfetivo(produtoDoPedido, variante);
 
     if (limiteEstoque != null && num > limiteEstoque) {
       return await interaction.reply({
@@ -1626,7 +1647,7 @@ async function iniciarCompraDireta(interaction, produtoId) {
   if (!produto) return interaction.reply({ content: '<:negativo:1528400986744295475> Produto indisponível para compra.', flags: 64 });
   if (!pagamentoDisponivel(interaction.guildId)) return interaction.reply({ content: '<:negativo:1528400986744295475> Esta loja está com o sistema PIX em manutenção (nenhuma forma de pagamento configurada).', flags: 64 });
   const temVariantes = (produto.variantes || []).length > 0;
-  if (!temVariantes && getEstoqueProdutoSemVariante(produto) <= 0) {
+  if (!temVariantes && !estoqueEhInfinito(produto) && getEstoqueProdutoSemVariante(produto) <= 0) {
     return interaction.reply({ content: `<:negativo:1528400986744295475> **${produto.titulo}** está esgotado no momento.`, flags: 64 });
   }
 
@@ -1660,7 +1681,7 @@ async function iniciarCompraVariante(interaction) {
 
   if (!variante) return interaction.reply({ content: '<:negativo:1528400986744295475> Esta variante não está mais disponível.', flags: 64 });
   if (!pagamentoDisponivel(interaction.guildId)) return interaction.reply({ content: '<:negativo:1528400986744295475> Esta loja está com o sistema PIX em manutenção (nenhuma forma de pagamento configurada).', flags: 64 });
-  const estoqueDisp = variante.estoque;
+  const estoqueDisp = getEstoqueVarianteEfetivo(produto, variante);
   if (estoqueDisp != null && estoqueDisp <= 0) return interaction.reply({ content: `<:negativo:1528400986744295475> **${variante.nome}** está esgotada no momento.`, flags: 64 });
 
   const { precoParaFloat } = require('../sales-system/salesManager');
@@ -2074,7 +2095,7 @@ async function abrirSeletorDeProdutoAtivo(interaction) {
   const opcoes = produtos.slice(0, 25).map(p => ({
     label: (p.titulo || 'Produto sem nome').slice(0, 100),
     value: `prod_set_ativo_${p.id}`,
-    description: `R$ ${p.preco || '0.00'} • ${(p.variantes || []).length} variante(s) • ${(p.estoque || []).length} em estoque`.slice(0, 100),
+    description: `R$ ${p.preco || '0.00'} • ${(p.variantes || []).length} variante(s) • ${estoqueEhInfinito(p) ? '∞' : (p.estoque || []).length} em estoque`.slice(0, 100),
     emoji: '<:caixa:1524207165496099007>'
   }));
   const embed = new EmbedBuilder()
@@ -2407,6 +2428,18 @@ async function handleButton(interaction) {
       flags: 64
     });
   }
+  if (id.startsWith('prod_toggle_estoqueinf_')) {
+    const produtoId = id.replace('prod_toggle_estoqueinf_', '');
+    const p = db.getProdutoPorId(interaction.guildId, produtoId) || {};
+    db.atualizarProduto(interaction.guildId, produtoId, 'estoqueInfinito', p.estoqueInfinito !== true);
+    // Reflete na vitrine pública já publicada (∞ / volta ao estoque real).
+    try { await atualizarVitrinePublicada(interaction.client, interaction.guildId, produtoId); } catch (e) { /* silencioso */ }
+    return interaction.update({
+      embeds: [buildAvancadoEmbed(interaction.guildId, interaction.guild, produtoId)],
+      components: buildAvancadoComponents(produtoId),
+      flags: 64
+    });
+  }
   if (id.startsWith('prod_modal_assinatura_')) {
     const produtoId = id.replace('prod_modal_assinatura_', '');
     const p = db.getProdutoPorId(interaction.guildId, produtoId) || {};
@@ -2480,7 +2513,7 @@ async function handleButton(interaction) {
     const variantes = db.getProdutoPorId(interaction.guildId, produtoId)?.variantes || [];
     const lista = variantes.length === 0 ? '> Nenhuma variante ativa.' : variantes.map((v, i) => {
       const emojiTxt = v.emoji ? `${v.emoji} ` : '';
-      const estoqueTxt = v.estoque != null ? `${v.estoque}` : '∞';
+      const estoqueTxt = (estoqueEhInfinito(db.getProdutoPorId(interaction.guildId, produtoId)) || v.estoque == null) ? '∞' : `${v.estoque}`;
       return `🔹 ${emojiTxt}\`${v.nome}\` — R$ ${formatarPrecoVariante(v.preco)} — Estoque: ${estoqueTxt}`;
     }).join('\n');
     return interaction.reply({
@@ -2524,7 +2557,7 @@ async function handleButton(interaction) {
     const options = variantes.slice(0, 25).map(v => ({
       label: v.nome.slice(0, 100),
       value: (v.id || v.nome.toLowerCase().replace(/\s/g, '_')).slice(0, 100),
-      description: `R$ ${formatarPrecoVariante(v.preco)} • ${v.estoque ?? 0} item(ns)`.slice(0, 100),
+      description: `R$ ${formatarPrecoVariante(v.preco)} • ${estoqueEhInfinito(db.getProdutoPorId(interaction.guildId, produtoId)) ? '∞' : (v.estoque ?? 0) + ' item(ns)'}`.slice(0, 100),
       emoji: parseEmojiParaOption(v.emoji) || { name: 'caixa', id: '1524207165496099007' },
     }));
     return interaction.reply({

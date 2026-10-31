@@ -850,7 +850,7 @@ async function entregarAutomatico({ client, guildId, clienteId, varianteKey, can
     // conceder qualquer cargo, registrar assinatura ou entregar — nunca
     // confirma pagamento/entrega se a variante tiver itensEstoque
     // cadastrado e ele estiver vazio (fonte de verdade = itens reais).
-    if (produto) {
+    if (produto && produto.estoqueInfinito !== true) {
       const variantesProdutoCheck = produto.variantes || [];
       const idxVCheck = variantesProdutoCheck.findIndex(v => varianteToKey(v.nome) === key);
       if (idxVCheck !== -1 && Array.isArray(variantesProdutoCheck[idxVCheck].itensEstoque) && variantesProdutoCheck[idxVCheck].itensEstoque.length === 0) {
@@ -899,7 +899,20 @@ async function entregarAutomatico({ client, guildId, clienteId, varianteKey, can
     }
 
     const itensEntregues = [];
-    if (produto) {
+    if (produto && produto.estoqueInfinito === true) {
+      // ESTOQUE INFINITO: nunca esgota e NÃO consome nada. Se houver itens
+      // cadastrados (variante ou produto), entrega-os por rodízio sem
+      // removê-los; sem itens cadastrados, não entrega item (só cargos/
+      // acesso), igual a produtos sem estoque físico.
+      const variantesInf = produto.variantes || [];
+      const vInf = variantesInf.find(v => varianteToKey(v.nome) === key);
+      const base = (vInf && Array.isArray(vInf.itensEstoque) && vInf.itensEstoque.length > 0)
+        ? vInf.itensEstoque
+        : (Array.isArray(produto.estoque) ? produto.estoque : []);
+      if (base.length > 0) {
+        for (let i = 0; i < qtd; i++) itensEntregues.push(base[i % base.length]);
+      }
+    } else if (produto) {
       const variantesProduto = produto.variantes || [];
       const idxV = variantesProduto.findIndex(v => varianteToKey(v.nome) === key);
 
