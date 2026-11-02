@@ -185,7 +185,7 @@ function estoqueBaixo(guildId, limite) {
   const produtos = db.getProdutos(guildId);
   const alertas = [];
   for (const p of produtos) {
-    if (!p.ativo || p.estoqueInfinito === true) continue;
+    if (!p.ativo) continue;
     const temVariantes = (p.variantes || []).length > 0;
     if (!temVariantes) {
       if (Array.isArray(p.estoque) && p.estoque.length > 0 && p.estoque.length <= limite) {
@@ -207,6 +207,7 @@ function cuponsResumo(guildId) {
   const lista = [];
   for (const p of produtos) {
     for (const [codigo, c] of Object.entries(p.cupons || {})) {
+      if (c.criadoPor === 'kael-auto' || c.criadoPor === 'afiliado') continue; // gerados pelo sistema de fidelidade
       lista.push({
         codigo,
         produtoNome: p.titulo,
@@ -239,7 +240,7 @@ function gerarRecomendacoes({ guildId, minutosAbandono, vendas, produtos }) {
   for (const p of produtos) {
     if (!p.ativo) continue;
     const d = demanda.find(x => x.produtoNome === p.titulo);
-    const estoqueBaixoProd = p.estoqueInfinito !== true && (p.estoque?.length ?? null) !== null && p.estoque.length > 0 && p.estoque.length <= 3;
+    const estoqueBaixoProd = (p.estoque?.length ?? null) !== null && p.estoque.length > 0 && p.estoque.length <= 3;
     if (estoqueBaixoProd && d && d.carrinhos >= 3) {
       recs.push({
         titulo: '📦 Estoque baixo com procura alta', prioridade: '🔴 Alta',
@@ -316,10 +317,9 @@ function detectarAlertas(guildId) {
   for (const p of produtos) {
     if (!p.ativo) continue;
     const temVariantes = (p.variantes || []).length > 0;
-    const semAlertaEstoque = p.estoqueInfinito === true;
 
     function avaliarEstoque(qtd, rotulo) {
-      if (semAlertaEstoque || typeof qtd !== 'number' || qtd < 0) return;
+      if (typeof qtd !== 'number' || qtd < 0) return;
       if (qtd <= 1) {
         alertas.push({
           tipo: 'estoque_critico', chave: `estoque_critico:${p.titulo}:${rotulo || ''}`,

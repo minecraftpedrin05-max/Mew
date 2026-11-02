@@ -176,6 +176,10 @@ client.once("ready", async () => {
   try { require('./backup-system/backupManager').iniciarBackupAutomatico(client); }
   catch (e) { console.error('[HUD] Falha ao iniciar o backup automático:', e.message); }
 
+  // Sistemas novos: logs do servidor, cashback/níveis/afiliados/cupons automáticos, reembolso
+  try { require('./extras-system').iniciar(client); }
+  catch (e) { console.error('[Extras] Falha ao iniciar os sistemas novos:', e); }
+
   // Inicia os sistemas automáticos (repostagem, limpeza, mensagens)
   iniciarScheduler(client);
 
@@ -253,6 +257,10 @@ client.on("interactionCreate", async (interaction) => {
   }
 
   if (interaction.isButton() || interaction.isAnySelectMenu() || interaction.isModalSubmit()) {
+    // Sistemas novos (logs, fidelidade, afiliados, reembolso) — prefixos xlogs_/xfid_/xafil_/xreemb_
+    try {
+      if (await require('./extras-system').handleInteraction(interaction, client)) return;
+    } catch (e) { console.error('[Extras] Falha no roteamento:', e); }
     try {
       await buttonHandler.execute(interaction, client);
     } catch (e) {

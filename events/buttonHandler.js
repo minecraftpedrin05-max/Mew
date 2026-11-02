@@ -215,7 +215,6 @@ module.exports = {
       customId?.startsWith('prod_roleselect_cargospos_add_') ||
       customId?.startsWith('prod_roleselect_cargospos_rem_') ||
       customId?.startsWith('prod_toggle_assinatura_') ||
-      customId?.startsWith('prod_toggle_estoqueinf_') ||
       customId?.startsWith('prod_modal_assinatura_');
 
     if (isProdutoMenu) {
