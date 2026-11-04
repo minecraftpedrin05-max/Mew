@@ -25,7 +25,7 @@ module.exports = {
     if (fs.existsSync(BANNER)) {
       files.push(new AttachmentBuilder(BANNER, { name: 'kael-banner.png' }));
       container.components.push(
-        { type: 12, items: [{ media: { url: 'attachment://kael-banner.png' } }] },
+        { type: 12, items: [{ media: { url: 'https://i.imgur.com/Xetp4KE.png' } }] },
         { type: 14, divider: true, spacing: 1 },
       );
     }
