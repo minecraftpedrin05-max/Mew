@@ -78,6 +78,9 @@
   tr:last-child td{border-bottom:0}
   td.r,th.r{text-align:right}
   .tablewrap{overflow-x:auto}
+  .tablewrap table{min-width:640px}
+  .nw{white-space:nowrap}
+  .cut{max-width:190px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .tag{display:inline-block;border:1px solid var(--line2);border-radius:999px;padding:1px 9px;font-size:12px;color:var(--muted)}
   .tag.inv{background:var(--inv-bg);color:var(--inv-text);border-color:var(--inv-bg)}
   .bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
@@ -99,7 +102,7 @@
 
   .mobile-bar{display:none}
   @media (max-width:900px){
-    .app{grid-template-columns:minmax(0,1fr)}
+    .app{grid-template-columns:minmax(0,1fr);grid-template-rows:auto 1fr;align-content:start}
     aside{min-width:0;position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px;gap:12px}
     nav{flex-direction:row;overflow-x:auto;gap:4px}
     nav button{white-space:nowrap}
@@ -281,7 +284,7 @@ function vendas(d){
   if (!d.pedidosRecentes.length) return `<div class="box">${vazio('Nenhuma venda registrada ainda.')}</div>`;
   const linhas = d.pedidosRecentes.map(p => `<tr>
     <td class="mono muted">#${esc(p.numero ?? '—')}</td>
-    <td>${esc(p.cliente)}</td>
+    <td class="cut" title="${esc(p.cliente)}">${esc(p.cliente)}</td>
     <td>${esc(p.produto)}${p.variante && p.variante !== p.produto ? ` <span class="muted">· ${esc(p.variante)}</span>` : ''}${p.quantidade > 1 ? ` <span class="muted">×${p.quantidade}</span>` : ''}</td>
     <td><span class="tag">${esc(p.metodo)}</span></td>
     <td class="r mono">${brl(p.valor)}</td>
@@ -292,15 +295,26 @@ function vendas(d){
 }
 
 /* ── Produtos ── */
+const reais = s => { const n = parseFloat(String(s ?? '').replace(/[^\d,.]/g,'').replace(',','.')); return isNaN(n) ? null : n; };
+function precoProd(p){
+  if (p.variantes.length){
+    const ns = p.variantes.map(v => reais(v.preco)).filter(n => n != null && n > 0);
+    if (!ns.length) return '—';
+    const mn = Math.min(...ns), mx = Math.max(...ns);
+    return mn === mx ? brl(mn) : `${brl(mn)} – ${brl(mx)}`;
+  }
+  const n = reais(p.preco);
+  return n ? brl(n) : '—';
+}
 function produtos(d){
   if (!d.produtos.length) return `<div class="box">${vazio('Nenhum produto cadastrado. Use /produto criar no Discord.')}</div>`;
   const vendido = Object.fromEntries(d.produtosRank.map(p => [p.nome, p]));
   const linhas = d.produtos.map(p => {
     const estoque = p.variantes.length
-      ? p.variantes.map(v => `<div><span class="muted">${esc(v.nome)}:</span> <span class="mono ${v.estoque!=null&&v.estoque<=3?'':'muted'}">${v.estoque ?? '∞'}</span></div>`).join('')
+      ? p.variantes.map(v => `<div class="nw"><span class="muted">${esc(v.nome)}:</span> <span class="mono ${v.estoque!=null&&v.estoque<=3?'':'muted'}">${v.estoque ?? '∞'}</span></div>`).join('')
       : `<span class="mono ${p.estoque<=3?'':'muted'}">${p.estoque}</span>`;
     const v = vendido[p.titulo];
-    return `<tr><td>${esc(p.titulo)}</td><td class="mono">${esc(p.preco)}</td><td>${estoque}</td>
+    return `<tr><td>${esc(p.titulo)}</td><td class="mono nw">${precoProd(p)}</td><td>${estoque}</td>
       <td class="mono">${v ? num(v.quantidade) : '0'}</td><td class="r mono">${v ? brl(v.faturamento) : '—'}</td>
       <td>${p.ativo ? '<span class="tag inv">Ativo</span>' : '<span class="tag">Desativado</span>'}</td></tr>`;
   }).join('');
@@ -325,7 +339,7 @@ function cupons(d){
 /* ── Clientes ── */
 function clientes(d){
   if (!d.topClientes.length) return `<div class="box">${vazio('Sem compras no período.')}</div>`;
-  const linhas = d.topClientes.map((c,i) => `<tr><td class="mono muted">${i+1}</td><td>${esc(c.nome)}</td>
+  const linhas = d.topClientes.map((c,i) => `<tr><td class="mono muted">${i+1}</td><td class="cut" title="${esc(c.nome)}">${esc(c.nome)}</td>
     <td class="mono">${num(c.pedidos)}</td><td class="r mono">${brl(c.total)}</td><td class="muted mono">${dataBR(c.ultima)}</td></tr>`).join('');
   return `<div class="box"><h3>Quem mais comprou</h3><div class="tablewrap"><table>
     <tr><th>#</th><th>Cliente</th><th>Pedidos</th><th class="r">Total</th><th>Última compra</th></tr>${linhas}</table></div></div>`;
