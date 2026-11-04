@@ -8,7 +8,7 @@ const { AttachmentBuilder } = require('discord.js');
 
 const BANNER_NAME = 'kael-banner.png';
 const BANNER_PATH = path.join(__dirname, '..', 'assets', BANNER_NAME);
-const BANNER_ATTACH_URL = `attachment://${BANNER_NAME}`;
+const BANNER_ATTACH_URL = 'https://i.imgur.com/Xetp4KE.png';
 
 let _buf = null;
 function bannerBuffer() {
