@@ -117,6 +117,17 @@ function iniciarWebhook(client) {
   const server = http.createServer(async (req, res) => {
     // ── VERIFICAÇÃO WEB (GET /verify/*, POST /verify/api/complete) — mesmo
     // servidor/porta, sem abrir porta nova (mesmo padrão já usado pra OpenPix). ──
+    // ── DASHBOARD WEB (/dashboard/*) — também no mesmo servidor/porta. ──
+    if (req.url === '/dashboard' || req.url.startsWith('/dashboard/') || req.url.startsWith('/dashboard?')) {
+      try {
+        return await require('../dashboard-system/dashboard').handleRequest(req, res, client);
+      } catch (e) {
+        console.error('[Dashboard] Erro não tratado:', e.message);
+        if (!res.headersSent) { res.writeHead(500); res.end('Erro interno.'); }
+        return;
+      }
+    }
+
     if (req.url.startsWith('/verify')) {
       try {
         return await require('../verificacao-system/webVerify').handleRequest(req, res, client);

@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kael — Dashboard</title>
+<style>
+  :root{
+    --bg:#0a0a0a; --panel:#111; --line:#232323; --line2:#333;
+    --text:#f2f2f2; --muted:#8c8c8c; --faint:#5a5a5a;
+    --inv-bg:#f2f2f2; --inv-text:#0a0a0a;
+    --up:#f2f2f2; --down:#8c8c8c;
+  }
+  @media (prefers-color-scheme: light){
+    :root{
+      --bg:#fafafa; --panel:#fff; --line:#e4e4e4; --line2:#d0d0d0;
+      --text:#0a0a0a; --muted:#6b6b6b; --faint:#9a9a9a;
+      --inv-bg:#0a0a0a; --inv-text:#fafafa; --up:#0a0a0a; --down:#6b6b6b;
+    }
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+  a{color:inherit}
+  button{font:inherit;color:inherit;cursor:pointer}
+  .mono{font-variant-numeric:tabular-nums}
+  .muted{color:var(--muted)}
+  .hidden{display:none!important}
+
+  /* botões */
+  .btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line2);background:transparent;padding:9px 16px;border-radius:8px;text-decoration:none;font-weight:500;transition:.15s}
+  .btn:hover{border-color:var(--text)}
+  .btn.solid{background:var(--inv-bg);color:var(--inv-text);border-color:var(--inv-bg)}
+  .btn.solid:hover{opacity:.88}
+  .btn.sm{padding:6px 12px;font-size:13px}
+
+  /* telas cheias (login/comprar/servidores) */
+  .center{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px}
+  .card-c{width:100%;max-width:560px}
+  .logo{font-weight:800;letter-spacing:.32em;font-size:15px}
+  h1{font-size:28px;line-height:1.2;font-weight:700;letter-spacing:-.02em;margin:22px 0 10px}
+  .lead{color:var(--muted);margin-bottom:26px}
+  .srv-list{display:flex;flex-direction:column;gap:8px;margin-top:6px}
+  .srv{display:flex;align-items:center;gap:14px;border:1px solid var(--line);background:var(--panel);padding:12px 14px;border-radius:10px}
+  .srv .nm{flex:1;min-width:0;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .ico{width:36px;height:36px;border-radius:50%;background:var(--line);display:grid;place-items:center;font-weight:700;overflow:hidden;flex:none}
+  .ico img{width:100%;height:100%;object-fit:cover}
+  .ft{margin-top:28px;display:flex;justify-content:space-between;align-items:center;color:var(--muted);font-size:13px}
+
+  /* layout do painel */
+  .app{display:grid;grid-template-columns:232px 1fr;min-height:100vh}
+  aside{border-right:1px solid var(--line);padding:22px 16px;display:flex;flex-direction:column;gap:22px;position:sticky;top:0;height:100vh}
+  nav{display:flex;flex-direction:column;gap:2px}
+  nav button{background:none;border:0;text-align:left;padding:9px 12px;border-radius:8px;color:var(--muted);font-weight:500}
+  nav button:hover{color:var(--text);background:var(--panel)}
+  nav button.on{color:var(--inv-text);background:var(--inv-bg)}
+  .side-srv{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;background:var(--panel);cursor:pointer;width:100%;text-align:left}
+  .side-srv .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500;font-size:13px}
+  .side-bottom{margin-top:auto;display:flex;flex-direction:column;gap:10px;font-size:13px}
+  main{padding:28px 32px 60px;min-width:0}
+  .top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:24px}
+  .top h2{font-size:22px;font-weight:700;letter-spacing:-.02em}
+  .seg{display:inline-flex;border:1px solid var(--line2);border-radius:8px;overflow:hidden}
+  .seg button{background:none;border:0;padding:7px 14px;font-size:13px;color:var(--muted)}
+  .seg button.on{background:var(--inv-bg);color:var(--inv-text)}
+
+  .grid{display:grid;gap:14px}
+  .kpis{grid-template-columns:repeat(4,minmax(0,1fr))}
+  .two{grid-template-columns:2fr 1fr}
+  .box{border:1px solid var(--line);background:var(--panel);border-radius:12px;padding:18px}
+  .box h3{font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:12px}
+  .kpi .v{font-size:28px;font-weight:700;letter-spacing:-.02em;margin-top:2px}
+  .kpi .d{font-size:12px;color:var(--muted);margin-top:2px}
+  .stack{display:flex;flex-direction:column;gap:14px}
+
+  table{width:100%;border-collapse:collapse}
+  th{font-size:11px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600;text-align:left;padding:8px 10px;border-bottom:1px solid var(--line)}
+  td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+  tr:last-child td{border-bottom:0}
+  td.r,th.r{text-align:right}
+  .tablewrap{overflow-x:auto}
+  .tag{display:inline-block;border:1px solid var(--line2);border-radius:999px;padding:1px 9px;font-size:12px;color:var(--muted)}
+  .tag.inv{background:var(--inv-bg);color:var(--inv-text);border-color:var(--inv-bg)}
+  .bar{height:6px;border-radius:99px;background:var(--line);overflow:hidden}
+  .bar i{display:block;height:100%;background:var(--text);border-radius:99px}
+  .empty{color:var(--muted);padding:22px 4px;text-align:center}
+  .alert{padding:12px 0;border-bottom:1px solid var(--line)}
+  .alert:last-child{border-bottom:0}
+  .alert b{display:block;font-weight:600}
+  .alert span{color:var(--muted);font-size:13px}
+  .spin{width:22px;height:22px;border:2px solid var(--line2);border-top-color:var(--text);border-radius:50%;animation:s .8s linear infinite}
+  @keyframes s{to{transform:rotate(360deg)}}
+
+  svg text{fill:var(--muted);font-size:11px;font-family:inherit}
+  .gl{stroke:var(--line);stroke-width:1}
+  .area{fill:var(--text);opacity:.07}
+  .line{fill:none;stroke:var(--text);stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .dot{fill:var(--bg);stroke:var(--text);stroke-width:2}
+  #tip{position:fixed;pointer-events:none;background:var(--inv-bg);color:var(--inv-text);padding:6px 10px;border-radius:6px;font-size:12px;opacity:0;transition:opacity .1s;z-index:9;white-space:nowrap}
+
+  .mobile-bar{display:none}
+  @media (max-width:900px){
+    .app{grid-template-columns:minmax(0,1fr)}
+    aside{min-width:0;position:static;height:auto;border-right:0;border-bottom:1px solid var(--line);padding:14px 16px;gap:12px}
+    nav{flex-direction:row;overflow-x:auto;gap:4px}
+    nav button{white-space:nowrap}
+    .side-bottom{flex-direction:row;margin-top:0;justify-content:space-between;align-items:center}
+    main{padding:20px 16px 48px}
+    .kpis{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .two{grid-template-columns:minmax(0,1fr)}
+    .kpi .v{font-size:22px}
+  }
+</style>
+</head>
+<body>
+<div id="tip"></div>
+<div id="root"><div class="center"><div class="spin"></div></div></div>
+
+<script>
+'use strict';
+const $ = s => document.querySelector(s);
+const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const brl = n => (n ?? 0).toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+const num = n => (n ?? 0).toLocaleString('pt-BR');
+const pct = n => (n == null ? '—' : `${n > 0 ? '+' : ''}${n.toFixed(0)}%`);
+const dataBR = iso => new Date(iso).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',year:'2-digit',hour:'2-digit',minute:'2-digit'});
+const iconeGuild = g => g.icone ? `<img src="https://cdn.discordapp.com/icons/${esc(g.id)}/${esc(g.icone)}.png?size=64" alt="">` : esc((g.nome||'?')[0].toUpperCase());
+
+const S = { me:null, guildId:null, dias:30, aba:'geral', dados:null };
+const ABAS = [['geral','Visão geral'],['vendas','Vendas'],['produtos','Produtos'],['cupons','Cupons'],['clientes','Clientes'],['funil','Funil']];
+
+async function api(path){
+  const r = await fetch(path,{credentials:'same-origin'});
+  const j = await r.json().catch(()=>({}));
+  return {status:r.status, ...j};
+}
+
+/* ───────── telas ───────── */
+function telaLogin(me){
+  const erro = new URLSearchParams(location.search).get('erro');
+  $('#root').innerHTML = `
+  <div class="center"><div class="card-c">
+    <div class="logo">KAEL</div>
+    <h1>Dashboard da sua loja</h1>
+    <p class="lead">Veja vendas, estoque, clientes e conversão em um só lugar. Entre com o Discord para ver os servidores que você administra.</p>
+    ${erro ? '<p style="margin-bottom:14px">Não consegui concluir o login. Tente de novo.</p>' : ''}
+    ${me && me.configurado === false ? '<p class="muted" style="margin-bottom:14px">O painel ainda não foi configurado pelo dono do bot.</p>' : ''}
+    <a class="btn solid" href="/dashboard/login">Entrar com Discord</a>
+  </div></div>`;
+}
+
+function telaComprar(){
+  $('#root').innerHTML = `
+  <div class="center"><div class="card-c">
+    <div class="logo">KAEL</div>
+    <h1>O Kael ainda não está em nenhum dos seus servidores</h1>
+    <p class="lead">Pra usar o dashboard você precisa ter o bot. Entre no nosso servidor pra comprar e ativar o Kael na sua loja.</p>
+    <a class="btn solid" href="${esc(S.me.comprarUrl)}" target="_blank" rel="noopener">Comprar o Kael</a>
+    <div class="ft"><span>${esc(S.me.user.nome)}</span><a href="/dashboard/logout">Sair</a></div>
+  </div></div>`;
+}
+
+function telaServidores(){
+  const lista = S.me.guilds.map(g => `
+    <div class="srv">
+      <div class="ico">${iconeGuild(g)}</div>
+      <div class="nm">${esc(g.nome)}</div>
+      ${g.botPresente
+        ? `<button class="btn solid sm" data-abrir="${esc(g.id)}">Abrir painel</button>`
+        : `<a class="btn sm" href="${esc(g.adicionarUrl)}" target="_blank" rel="noopener">Adicionar bot</a>`}
+    </div>`).join('');
+  $('#root').innerHTML = `
+  <div class="center"><div class="card-c">
+    <div class="logo">KAEL</div>
+    <h1>Escolha um servidor</h1>
+    <p class="lead">Aparecem os servidores onde você é dono ou administrador.</p>
+    <div class="srv-list">${lista}</div>
+    <div class="ft"><span>${esc(S.me.user.nome)}</span><a href="/dashboard/logout">Sair</a></div>
+  </div></div>`;
+  document.querySelectorAll('[data-abrir]').forEach(b => b.onclick = () => abrirGuild(b.dataset.abrir));
+}
+
+/* ───────── painel ───────── */
+async function abrirGuild(id){
+  S.guildId = id; S.dados = null;
+  renderPainel();
+  await carregar();
+}
+async function carregar(){
+  const r = await api(`/dashboard/api/guild/${S.guildId}?dias=${S.dias}`);
+  if (r.status === 401) return location.reload();
+  if (r.status !== 200) { $('#conteudo').innerHTML = `<div class="box empty">${esc(r.erro || 'Erro ao carregar')}</div>`; return; }
+  S.dados = r; renderConteudo();
+}
+
+function renderPainel(){
+  const g = S.me.guilds.find(x => x.id === S.guildId);
+  $('#root').innerHTML = `
+  <div class="app">
+    <aside>
+      <div class="logo">KAEL</div>
+      <button class="side-srv" id="trocar" title="Trocar servidor">
+        <div class="ico" style="width:28px;height:28px;font-size:12px">${iconeGuild(g)}</div>
+        <div class="nm">${esc(g.nome)}</div><span class="muted">⇅</span>
+      </button>
+      <nav>${ABAS.map(([k,n]) => `<button data-aba="${k}" class="${S.aba===k?'on':''}">${n}</button>`).join('')}</nav>
+      <div class="side-bottom"><span class="muted">${esc(S.me.user.nome)}</span><a class="muted" href="/dashboard/logout">Sair</a></div>
+    </aside>
+    <main>
+      <div class="top">
+        <h2 id="titulo"></h2>
+        <div class="seg" id="periodo">${[[7,'7d'],[30,'30d'],[90,'90d']].map(([d,l]) => `<button data-d="${d}" class="${S.dias===d?'on':''}">${l}</button>`).join('')}</div>
+      </div>
+      <div id="conteudo"><div class="center" style="min-height:40vh"><div class="spin"></div></div></div>
+    </main>
+  </div>`;
+  $('#trocar').onclick = telaServidores;
+  document.querySelectorAll('[data-aba]').forEach(b => b.onclick = () => { S.aba = b.dataset.aba; renderPainel(); renderConteudo(); });
+  document.querySelectorAll('#periodo button').forEach(b => b.onclick = async () => { S.dias = +b.dataset.d; renderPainel(); await carregar(); });
+  $('#titulo').textContent = ABAS.find(a => a[0] === S.aba)[1];
+  if (S.dados) renderConteudo();
+}
+
+function kpi(rotulo, valor, detalhe){
+  return `<div class="box kpi"><h3>${rotulo}</h3><div class="v mono">${valor}</div><div class="d">${detalhe||'&nbsp;'}</div></div>`;
+}
+const vazio = t => `<div class="empty">${t}</div>`;
+
+function renderConteudo(){
+  const d = S.dados; if (!d) return;
+  $('#titulo').textContent = ABAS.find(a => a[0] === S.aba)[1];
+  const el = $('#conteudo');
+  el.innerHTML = ({geral, vendas, produtos, cupons, clientes, funil})[S.aba](d);
+  if (S.aba === 'geral') desenharGrafico(d.serie);
+}
+
+/* ── Visão geral ── */
+function geral(d){
+  const r = d.resumo;
+  const dVar = r.variacaoPct == null ? 'sem período anterior' : `${pct(r.variacaoPct)} vs. período anterior`;
+  const m = d.meta;
+  const meta = m ? `
+    <div class="box"><h3>Meta de vendas</h3>
+      <div style="display:flex;justify-content:space-between;margin-bottom:8px"><b class="mono">${esc(m.alcancadoStr)}</b><span class="muted mono">de ${esc(m.valorStr)}</span></div>
+      <div class="bar"><i style="width:${m.percentual}%"></i></div>
+      <p class="muted" style="margin-top:8px;font-size:13px">${m.atingida ? 'Meta atingida.' : m.expirada ? 'Meta encerrada.' : `Faltam ${esc(m.restanteStr)} em ${m.diasRestantes} dia(s)${m.mediaDiariaStr ? ` — ${esc(m.mediaDiariaStr)}/dia` : ''}.`}</p>
+    </div>` : '';
+  const alertas = d.alertas.length
+    ? d.alertas.map(a => `<div class="alert"><b>${esc(a.titulo)}</b><span>${esc(String(a.texto).replace(/\*\*/g,''))}</span></div>`).join('')
+    : vazio('Nada pra mostrar por enquanto.');
+  return `
+  <div class="stack">
+    <div class="grid kpis">
+      ${kpi('Faturamento', brl(r.faturamento), dVar)}
+      ${kpi('Pedidos', num(r.pedidos), `${num(r.pedidosAnterior)} no período anterior`)}
+      ${kpi('Ticket médio', brl(r.ticketMedio), `${num(r.clientesUnicos)} cliente(s)`)}
+      ${kpi('Reembolsos', num(r.reembolsos), r.reembolsos ? brl(r.reembolsado) : 'nenhum')}
+    </div>
+    <div class="grid two">
+      <div class="box"><h3>Vendas por dia</h3><div id="grafico"></div></div>
+      <div class="stack">${meta}
+        <div class="box"><h3>Carrinhos abandonados</h3><div class="kpi"><div class="v mono">${num(r.carrinhosAbandonados)}</div><div class="d">parados agora</div></div></div>
+      </div>
+    </div>
+    <div class="grid two">
+      <div class="box"><h3>Alertas e recomendações</h3>${alertas}</div>
+      <div class="box"><h3>Mais vendidos</h3>${rankProdutos(d.produtosRank.slice(0,5))}</div>
+    </div>
+  </div>`;
+}
+function rankProdutos(lista){
+  if (!lista.length) return vazio('Sem vendas no período.');
+  const max = Math.max(...lista.map(p => p.faturamento)) || 1;
+  return lista.map(p => `<div style="margin-bottom:14px">
+    <div style="display:flex;justify-content:space-between;gap:10px"><span>${esc(p.nome)}</span><span class="mono muted">${brl(p.faturamento)}</span></div>
+    <div class="bar" style="margin-top:6px"><i style="width:${(p.faturamento/max)*100}%"></i></div>
+    <span class="muted" style="font-size:12px">${num(p.quantidade)} un.</span></div>`).join('');
+}
+
+/* ── Vendas ── */
+function vendas(d){
+  if (!d.pedidosRecentes.length) return `<div class="box">${vazio('Nenhuma venda registrada ainda.')}</div>`;
+  const linhas = d.pedidosRecentes.map(p => `<tr>
+    <td class="mono muted">#${esc(p.numero ?? '—')}</td>
+    <td>${esc(p.cliente)}</td>
+    <td>${esc(p.produto)}${p.variante && p.variante !== p.produto ? ` <span class="muted">· ${esc(p.variante)}</span>` : ''}${p.quantidade > 1 ? ` <span class="muted">×${p.quantidade}</span>` : ''}</td>
+    <td><span class="tag">${esc(p.metodo)}</span></td>
+    <td class="r mono">${brl(p.valor)}</td>
+    <td class="muted mono">${dataBR(p.data)}</td>
+    <td>${p.reembolsado ? '<span class="tag">Reembolsado</span>' : '<span class="tag inv">Pago</span>'}</td></tr>`).join('');
+  return `<div class="box"><h3>Últimos pedidos</h3><div class="tablewrap"><table>
+    <tr><th>Pedido</th><th>Cliente</th><th>Produto</th><th>Método</th><th class="r">Valor</th><th>Data</th><th>Status</th></tr>${linhas}</table></div></div>`;
+}
+
+/* ── Produtos ── */
+function produtos(d){
+  if (!d.produtos.length) return `<div class="box">${vazio('Nenhum produto cadastrado. Use /produto criar no Discord.')}</div>`;
+  const vendido = Object.fromEntries(d.produtosRank.map(p => [p.nome, p]));
+  const linhas = d.produtos.map(p => {
+    const estoque = p.variantes.length
+      ? p.variantes.map(v => `<div><span class="muted">${esc(v.nome)}:</span> <span class="mono ${v.estoque!=null&&v.estoque<=3?'':'muted'}">${v.estoque ?? '∞'}</span></div>`).join('')
+      : `<span class="mono ${p.estoque<=3?'':'muted'}">${p.estoque}</span>`;
+    const v = vendido[p.titulo];
+    return `<tr><td>${esc(p.titulo)}</td><td class="mono">${esc(p.preco)}</td><td>${estoque}</td>
+      <td class="mono">${v ? num(v.quantidade) : '0'}</td><td class="r mono">${v ? brl(v.faturamento) : '—'}</td>
+      <td>${p.ativo ? '<span class="tag inv">Ativo</span>' : '<span class="tag">Desativado</span>'}</td></tr>`;
+  }).join('');
+  const cresc = d.crescimento.filter(c => c.tendencia !== 'estavel').map(c => `
+    <div class="alert"><b>${esc(c.produtoNome)}</b><span>${c.tendencia === 'queda' ? 'Queda' : 'Crescimento'}: ${c.qtdAnterior} → ${c.qtdAtual} vendas (15 dias vs. 15 anteriores)</span></div>`).join('');
+  return `<div class="stack"><div class="box"><h3>Catálogo e estoque</h3><div class="tablewrap"><table>
+    <tr><th>Produto</th><th>Preço</th><th>Estoque</th><th>Vendidos</th><th class="r">Faturamento</th><th>Status</th></tr>${linhas}</table></div></div>
+    <div class="box"><h3>Tendência</h3>${cresc || vazio('Sem mudanças relevantes nos últimos 15 dias.')}</div></div>`;
+}
+
+/* ── Cupons ── */
+function cupons(d){
+  if (!d.cupons.length) return `<div class="box">${vazio('Nenhum cupom criado.')}</div>`;
+  const linhas = d.cupons.map(c => `<tr><td class="mono"><b>${esc(c.codigo)}</b></td><td>${esc(c.produtoNome)}</td>
+    <td class="mono">${num(c.usos)}${c.usosMaximos ? ` / ${num(c.usosMaximos)}` : ''}</td>
+    <td class="muted">${c.diasAtivo != null ? `${c.diasAtivo} dia(s)` : '—'}</td>
+    <td>${c.usos === 0 ? '<span class="tag">Sem uso</span>' : '<span class="tag inv">Em uso</span>'}</td></tr>`).join('');
+  return `<div class="box"><h3>Cupons</h3><div class="tablewrap"><table>
+    <tr><th>Código</th><th>Produto</th><th>Usos</th><th>Criado há</th><th>Status</th></tr>${linhas}</table></div></div>`;
+}
+
+/* ── Clientes ── */
+function clientes(d){
+  if (!d.topClientes.length) return `<div class="box">${vazio('Sem compras no período.')}</div>`;
+  const linhas = d.topClientes.map((c,i) => `<tr><td class="mono muted">${i+1}</td><td>${esc(c.nome)}</td>
+    <td class="mono">${num(c.pedidos)}</td><td class="r mono">${brl(c.total)}</td><td class="muted mono">${dataBR(c.ultima)}</td></tr>`).join('');
+  return `<div class="box"><h3>Quem mais comprou</h3><div class="tablewrap"><table>
+    <tr><th>#</th><th>Cliente</th><th>Pedidos</th><th class="r">Total</th><th>Última compra</th></tr>${linhas}</table></div></div>`;
+}
+
+/* ── Funil ── */
+function funil(d){
+  const f = d.funil;
+  if (!f) return `<div class="box">${vazio('Ainda não há carrinhos registrados nesse período.')}</div>`;
+  const etapas = [['Carrinhos iniciados', f.iniciados],['PIX gerado', f.pixGerados],['Pagos', f.pagos]];
+  const topo = f.iniciados || 1;
+  const barras = etapas.map(([n,v]) => `<div style="margin-bottom:16px">
+    <div style="display:flex;justify-content:space-between"><span>${n}</span><span class="mono">${num(v)} <span class="muted">(${(v/topo*100).toFixed(0)}%)</span></span></div>
+    <div class="bar" style="margin-top:6px"><i style="width:${v/topo*100}%"></i></div></div>`).join('');
+  const linhas = d.demanda.sort((a,b) => b.carrinhos - a.carrinhos).map(p => `<tr><td>${esc(p.produtoNome)}</td>
+    <td class="mono">${num(p.carrinhos)}</td><td class="mono">${num(p.pagos)}</td><td class="mono">${num(p.cancelados)}</td>
+    <td class="r mono">${p.taxaConversao.toFixed(0)}%</td></tr>`).join('');
+  return `<div class="stack"><div class="grid two">
+    <div class="box"><h3>Funil de compra</h3>${barras}
+      <p class="muted" style="font-size:13px">Conversão geral: <b class="mono" style="color:var(--text)">${f.taxaConversao.toFixed(1)}%</b> · ${num(f.cancelados)} cancelado(s) · ${num(f.emAberto)} em aberto</p></div>
+    <div class="box"><h3>Abandonados agora</h3><div class="kpi"><div class="v mono">${num(d.resumo.carrinhosAbandonados)}</div><div class="d">carrinhos parados</div></div></div></div>
+    <div class="box"><h3>Conversão por produto</h3><div class="tablewrap"><table>
+      <tr><th>Produto</th><th>Carrinhos</th><th>Pagos</th><th>Cancelados</th><th class="r">Conversão</th></tr>${linhas || ''}</table></div></div></div>`;
+}
+
+/* ───────── gráfico (SVG puro) ───────── */
+function desenharGrafico(serie){
+  const el = $('#grafico'); if (!el) return;
+  if (!serie.some(s => s.valor > 0)) { el.innerHTML = vazio('Sem vendas no período.'); return; }
+  const W = 640, H = 220, pl = 44, pr = 8, pt = 10, pb = 24;
+  const max = Math.max(...serie.map(s => s.valor)) || 1;
+  const nice = Math.ceil(max / 4 / 10) * 10 * 4 || max;
+  const x = i => pl + (serie.length === 1 ? 0 : (i / (serie.length - 1)) * (W - pl - pr));
+  const y = v => pt + (1 - v / nice) * (H - pt - pb);
+  const pts = serie.map((s,i) => `${x(i).toFixed(1)},${y(s.valor).toFixed(1)}`);
+  const grid = [0,1,2,3,4].map(i => { const v = nice * i / 4, yy = y(v);
+    return `<line class="gl" x1="${pl}" x2="${W-pr}" y1="${yy}" y2="${yy}"/><text x="${pl-8}" y="${yy+4}" text-anchor="end">${Math.round(v)}</text>`; }).join('');
+  const passo = Math.ceil(serie.length / 6);
+  const eixoX = serie.map((s,i) => i % passo === 0 ? `<text x="${x(i)}" y="${H-6}" text-anchor="middle">${s.dia.slice(8)}/${s.dia.slice(5,7)}</text>` : '').join('');
+  el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Vendas por dia">
+    ${grid}${eixoX}
+    <polygon class="area" points="${x(0)},${y(0)} ${pts.join(' ')} ${x(serie.length-1)},${y(0)}"/>
+    <polyline class="line" points="${pts.join(' ')}"/>
+    <circle class="dot" r="4" cx="-10" cy="-10" id="ponto"/>
+    <rect x="${pl}" y="0" width="${W-pl-pr}" height="${H-pb}" fill="transparent" id="hit"/></svg>`;
+  const svg = el.querySelector('svg'), tip = $('#tip'), ponto = $('#ponto');
+  const mover = ev => {
+    const b = svg.getBoundingClientRect();
+    const px = ((ev.clientX - b.left) / b.width) * W;
+    const i = Math.max(0, Math.min(serie.length - 1, Math.round(((px - pl) / (W - pl - pr)) * (serie.length - 1))));
+    const s = serie[i];
+    ponto.setAttribute('cx', x(i)); ponto.setAttribute('cy', y(s.valor));
+    tip.textContent = `${s.dia.slice(8)}/${s.dia.slice(5,7)} · ${brl(s.valor)} · ${s.pedidos} pedido(s)`;
+    tip.style.left = Math.min(ev.clientX + 12, innerWidth - 220) + 'px'; tip.style.top = (ev.clientY - 36) + 'px'; tip.style.opacity = 1;
+  };
+  const hit = $('#hit');
+  hit.addEventListener('mousemove', mover); hit.addEventListener('touchmove', e => mover(e.touches[0]), {passive:true});
+  hit.addEventListener('mouseleave', () => { tip.style.opacity = 0; ponto.setAttribute('cx', -10); });
+}
+
+/* ───────── início ───────── */
+(async function(){
+  const me = await api('/dashboard/api/me');
+  if (me.status === 401 || !me.logado) return telaLogin(me);
+  S.me = me;
+  if (!me.temBotEmAlgum) return telaComprar();
+  const comBot = me.guilds.filter(g => g.botPresente);
+  if (comBot.length === 1 && me.guilds.length === 1) return abrirGuild(comBot[0].id);
+  telaServidores();
+})();
+</script>
+</body>
+</html>
