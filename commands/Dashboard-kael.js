@@ -37,7 +37,7 @@ module.exports = {
     );
 
     return interaction.reply({
-      flags: (1 << 15), // IS_COMPONENTS_V2
+      flags: (1 << 15) | 64, // IS_COMPONENTS_V2
       files,
       components: [
         container,
