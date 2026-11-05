@@ -63,7 +63,7 @@ function buildPainelContainer(user) {
       new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('painel_definicoes') .setLabel('Definições').setEmoji({ name: 'configuracoes', id: '1515379328475730081' }).setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('painel_acoes_auto').setLabel('Ações Automáticas').setEmoji({ name: 'xpooo', id: '1523791736948920433' }).setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('painel_protecao').setLabel('Proteção').setEmoji({ name: 'escudo', id: '111111111111111111' }).setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('painel_protecao')  .setLabel('Proteção').setEmoji({ name: 'safety', id: '1528841000548569239' }).setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('painel_boasvindas').setLabel('Boas Vindas').setEmoji({ name: 'sino', id: '1528840971096297482' }).setStyle(ButtonStyle.Secondary),
       )
     )
@@ -71,7 +71,7 @@ function buildPainelContainer(user) {
     .addActionRowComponents(
       new ActionRowBuilder().addComponents(
         new ButtonBuilder().setCustomId('painel_personalizacao').setLabel('Personalizar Bot').setEmoji({ name: 'personalizarE', id: '1528401146274910289' }).setStyle(ButtonStyle.Secondary),
-        new ButtonBuilder().setCustomId('painel_verificacao').setLabel('Verificação').setEmoji('🛡️').setStyle(ButtonStyle.Secondary),
+        new ButtonBuilder().setCustomId('painel_verificacao').setLabel('Verificação').setEmoji({ name: 'escudo', id: '111111111111111111' }).setStyle(ButtonStyle.Secondary),
         new ButtonBuilder().setCustomId('painel_sugestoes').setLabel('Sugestões').setEmoji({ name: 'luz', id: '111111111111111111' }).setStyle(ButtonStyle.Secondary),
       )
     );
