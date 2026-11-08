@@ -283,7 +283,7 @@ async function handle(interaction) {
     // testa o modelo antes de salvar (modelo errado derrubaria a IA)
     await interaction.deferUpdate();
     if (m) {
-      const r = await prov.gerar({ provedor: p.provedor, key: p.key, modelo: m, sistema: 'Responda apenas com a palavra OK.',
+      const r = await prov.gerar({ estrito: true, provedor: p.provedor, key: p.key, modelo: m, sistema: 'Responda apenas com a palavra OK.',
         mensagens: [{ role: 'user', content: 'Teste.' }], maxTokens: 24, timeoutMs: 15000 });
       if (!r.ok && r.tipo !== 'limite') return interaction.followUp({ embeds: [embedErro(`O modelo **${cortar(m, 60)}** não funcionou: ${cortar(r.msg, 160)}`)], flags: 64 });
     }
