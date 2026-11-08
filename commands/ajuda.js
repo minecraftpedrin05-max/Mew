@@ -39,7 +39,9 @@ module.exports = {
   async execute(interaction, client) {
     const c = client || interaction.client;
     const ehDono = interaction.user.id === BOT_OWNER_ID;
+    const dono = require('../dono-system/donoManager');
     const pode = (nome) => {
+      if (!ehDono && (nome === 'dono' || dono.estaOculto(nome))) return false;
       const exigida = c.commandPerms?.get(nome);
       return ehDono || !exigida || interaction.memberPermissions?.has(exigida);
     };

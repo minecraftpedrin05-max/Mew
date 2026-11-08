@@ -27,6 +27,7 @@ async function handleInteraction(interaction, client) {
     return false;
   };
   try {
+    if (id.startsWith('xdono_'))  { await require('../dono-system/donoUI').handle(interaction); return true; }
     if (id.startsWith('xlogs_'))  { if (await guildOnly()) await logs.handleInteraction(interaction); return true; }
     if (id.startsWith('xreemb_')) { if (await guildOnly()) await reembolso.handleInteraction(interaction, client); return true; }
     if (id.startsWith('xafil_'))  { if (await guildOnly()) await ui.handleAfiliado(interaction); return true; }

@@ -43,8 +43,21 @@ const { BOT_OWNER_ID } = require('./config/constants');
 // Registra os comandos de barra no Discord e DIZ no log exatamente o que aconteceu.
 // Se UM comando estiver inválido o Discord recusa o lote inteiro (e ficam só os
 // comandos antigos). Nesse caso registramos um por um pra isolar o culpado.
-async function sincronizarComandos(rest, commandsJSON, client) {
+async function sincronizarComandos(rest, todos, client) {
   client.errosRegistro = [];
+  // /dono: se DONO_GUILD_ID estiver definido, ele existe SÓ nesse servidor (o seu), nunca no global.
+  const guildDono = process.env.DONO_GUILD_ID;
+  let commandsJSON = todos;
+  if (guildDono) {
+    commandsJSON = todos.filter(c => c.name !== 'dono');
+    try {
+      await rest.put(Routes.applicationGuildCommands(CLIENT_ID, guildDono), { body: todos.filter(c => c.name === 'dono') });
+      console.log(`[Comandos] /dono registrado só no servidor ${guildDono}.`);
+    } catch (e) {
+      console.error('[Comandos] Não consegui registrar /dono no servidor DONO_GUILD_ID:', e.message);
+      client.errosRegistro.push({ nome: 'dono', msg: 'DONO_GUILD_ID inválido ou o bot não está nesse servidor.' });
+    }
+  }
   const nomes = commandsJSON.map(c => c.name);
   console.log(`[Comandos] Carregados ${nomes.length}: ${nomes.join(', ')}`);
   try {
@@ -98,8 +111,12 @@ function registrarComando(cmd) {
     client.commandPerms.set(json.name, BigInt(json.default_member_permissions));
     json.default_member_permissions = null;
   }
+  if (cmd.somenteDono) json.default_member_permissions = "0"; // só administradores veem; a checagem real do dono é no execute
   commandsJSON.push(json);
 }
+client.commandsJSON = commandsJSON;
+client.registrarComando = registrarComando;
+const donoManager = require("./dono-system/donoManager");
 
 const commandsPath = path.join(__dirname, "commands");
 if (fs.existsSync(commandsPath)) {
@@ -120,6 +137,8 @@ if (fs.existsSync(commandsPath)) {
     }
   }
 }
+
+donoManager.carregarCustom(client, registrarComando);   // comandos criados pelo dono (/dono)
 
 const buttonHandler  = require("./events/buttonHandler");
 const messageHandler = require("./events/messageHandler");
@@ -144,7 +163,10 @@ client.once("ready", async () => {
 
   try {
     const rest = new REST({ version: "10" }).setToken(TOKEN);
-    await sincronizarComandos(rest, commandsJSON, client);
+    const visiveis = () => commandsJSON.filter(c => !donoManager.estaOculto(c.name));
+    client.ressincronizarComandos = async () => { await sincronizarComandos(rest, visiveis(), client); donoManager.marcarSincronizado(); };
+    await sincronizarComandos(rest, visiveis(), client);
+    donoManager.marcarSincronizado();
     if (client.errosRegistro?.length) {   // avisa o dono por DM quando algum comando for recusado
       const txt = client.errosRegistro.map(e => `• /${e.nome}: ${e.msg}`).join('\n').slice(0, 1800);
       client.users.fetch(BOT_OWNER_ID).then(u => u.send(`⚠️ O Discord recusou comando(s) ao iniciar:\n${txt}`)).catch(() => {});
@@ -238,6 +260,7 @@ client.on("voiceStateUpdate", (oldState, newState) => {
 });
 
 client.on("interactionCreate", async (interaction) => {
+  try { if (await donoManager.barrar(interaction)) return; } catch (e) { console.error('[Dono] barrar falhou:', e); }
   if (interaction.isChatInputCommand() || interaction.isContextMenuCommand()) {
     const command = client.commands.get(interaction.commandName);
     if (!command) return;

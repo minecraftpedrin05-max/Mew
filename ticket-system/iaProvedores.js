@@ -8,9 +8,9 @@
 // ═══════════════════════════════════════════════════════════════════════════
 
 const PROVEDORES = {
-  gemini:     { nome: 'Google Gemini',      modelo: 'gemini-3.8-flash' },
+  gemini:     { nome: 'Google Gemini',      modelo: 'gemini-2.5-flash' },
   openai:     { nome: 'OpenAI',             modelo: 'gpt-4o-mini' },
-  groq:       { nome: 'Groq',               modelo: 'openai/gpt-oss-120b' },
+  groq:       { nome: 'Groq',               modelo: 'llama-3.3-70b-versatile' },
   openrouter: { nome: 'OpenRouter',         modelo: 'openai/gpt-4o-mini' },
   anthropic:  { nome: 'Anthropic (Claude)', modelo: 'claude-haiku-5-5' },
 };
