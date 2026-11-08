@@ -41,9 +41,18 @@ const REGRAS_FIXAS =
 // ── Config ─────────────────────────────────────────────────────────────────
 function getIA(guildId) {
   const ia = tm().getConfig(guildId).ia || {};
+  // Atualiza automaticamente os modelos antigos já salvos nas configurações.
+  const substituicoes = {
+    'gemini-2.5-flash': 'gemini-3.8-flash',
+    'llama-3.3-70b-versatile': 'openai/gpt-oss-120b',
+  };
+  const keys = (Array.isArray(ia.keys) ? ia.keys : []).map(k => ({
+    ...k,
+    modelo: substituicoes[k.modelo] || k.modelo,
+  }));
   return {
     ativo: false, validada: false, prompt: null, pausarComStaff: true, usarLoja: true, aviso: true, limite: 20,
-    ...ia, keys: Array.isArray(ia.keys) ? ia.keys : [],
+    ...ia, keys,
   };
 }
 function salvarIA(guildId, ia) { tm().saveConfig(guildId, { ia }); }
